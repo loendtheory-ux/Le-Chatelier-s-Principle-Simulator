@@ -1,0 +1,3433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Level Up: Le Châtelier's Principle Simulator</title>
+<style>
+/* =====================================================
+   ZERO EXTERNAL DEPENDENCIES — 100% self-contained
+   Shell-pink theme · NYS Regents Chemistry
+   ===================================================== */
+:root {
+  --shell-lightest:#FFF3F0; --shell-light:#FFD8D0; --shell-mid:#F5A898;
+  --shell-pink:#E86858;     --shell-deep:#CB4A3C;  --shell-dark:#A83028;
+  --shell-darker:#721E18;
+  --react-color:#3AAED0; --react-light:#B8E4F4; --react-bg:rgba(58,174,208,0.14);
+  --prod-color:#48B028;  --prod-light:#BCEAA0;  --prod-bg:rgba(72,176,40,0.13);
+  --text-dark:#180A08; --text-mid:#501E18; --text-light:#906050;
+  --surface:#FFFFFF;   --border:#E8B0A8;
+  --gold:#E8A820; --purple:#7860C0; --teal:#28A090;
+  --r:8px; --rm:14px; --rl:20px;
+  --s1:0 2px 10px rgba(168,48,40,.14);
+  --s2:0 4px 22px rgba(168,48,40,.20);
+  --s3:0 8px 44px rgba(168,48,40,.26);
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono: 'Consolas', 'Courier New', monospace;
+  --stat-bg:#FFFAF9; --stat-border:#E8B0A8; --stat-val:#A83028;
+  --ex-bg:#FFF3F0;   --ex-border:#E8B0A8;
+}
+
+/* ── NIGHT / DARK MODE — Pastel Pink ── */
+.dark {
+  --shell-lightest:#1C0C10; --shell-light:#2A1018; --shell-mid:#5A2030;
+  --shell-pink:#FF8090;     --shell-deep:#E05870;  --shell-dark:#FF9EAC;
+  --shell-darker:#FFC8D0;
+  --react-color:#50D8F0; --react-light:#082830; --react-bg:rgba(80,216,240,.16);
+  --prod-color:#60E040;  --prod-light:#082010;  --prod-bg:rgba(96,224,64,.16);
+  --text-dark:#FFE8EC; --text-mid:#F0B8C0; --text-light:#A87880;
+  --surface:#200C12;   --border:#5A2030;
+  --s1:0 2px 12px rgba(0,0,0,.55);
+  --s2:0 4px 24px rgba(0,0,0,.65);
+  --s3:0 8px 48px rgba(200,40,80,.4);
+  --stat-bg:#280E14; --stat-border:#5A2030; --stat-val:#FF9EAC;
+  --ex-bg:#200A10;   --ex-border:#5A2030;
+}
+
+/* Night body: deep rose-black */
+.dark body{background:radial-gradient(ellipse at 35% 15%,#2E0F18 0%,#1C0C10 50%,#100608 100%)}
+
+/* Night header: luminous pastel-pink gradient */
+.dark .hdr{
+  background:linear-gradient(135deg,#3A1020 0%,#6A1830 35%,#E05870 70%,#FF8090 100%);
+  box-shadow:0 4px 32px rgba(224,88,112,.45),0 1px 0 rgba(255,200,210,.25) inset;
+}
+
+/* Night reaction container: deep rose glow */
+.dark .rxn-cont{
+  background:linear-gradient(160deg,#280C18 0%,#1A0810 100%);
+  border-color:#7A2840;
+  box-shadow:0 0 40px rgba(200,30,70,.35),0 0 80px rgba(160,20,50,.15),inset 0 1px 0 rgba(255,160,180,.08);
+}
+
+/* Night stat cards: individual color glows */
+.dark #statDH{background:linear-gradient(135deg,#280E14,#320A10);box-shadow:var(--s1),0 0 16px rgba(255,128,144,.25);border-color:#6A2038}
+.dark #statTemp{background:linear-gradient(135deg,#281408,#321000);box-shadow:var(--s1),0 0 16px rgba(255,160,80,.2);border-color:#6A3010}
+.dark #statPress{background:linear-gradient(135deg,#180E28,#200A30);box-shadow:var(--s1),0 0 16px rgba(160,120,255,.2);border-color:#4A2870}
+.dark #statKcard{background:linear-gradient(135deg,#081828,#082030);box-shadow:var(--s1),0 0 16px rgba(80,216,240,.2);border-color:#0A3A50}
+.dark .stat-val{text-shadow:0 0 14px currentColor;font-weight:900}
+.dark .stat-lbl{color:#A87880} .dark .stat-sub{color:#806070}
+
+/* Night panels: deep rose gradients */
+.dark .left{background:linear-gradient(180deg,#220E14 0%,#180A0E 100%);border-right-color:#5A2030}
+.dark .right{background:linear-gradient(180deg,#200C12 0%,#160808 100%);border-left-color:#5A2030}
+.dark .center{background:radial-gradient(ellipse at 50% 0%,#2A1018 0%,#1C0C10 65%)}
+
+/* Night explain */
+.dark .explain-drawer{border-color:#FF8090;box-shadow:0 8px 32px rgba(200,30,70,.5)}
+.dark .ex-card{background:#1E0A10;border-top-color:#3A1820}
+.dark .explain-toggle-btn{background:#220C12;border-color:#5A2030;color:#F0B8C0}
+.dark .explain-toggle-btn.open{border-color:#FF8090;background:#280C14}
+.dark .explain-toggle-btn.has-content .etb-dot{background:#FF8090;box-shadow:0 0 8px #FF8090}
+.dark .ex-k .ex-ttl{color:#FFD060} .dark .ex-tip .ex-ttl{color:#FFD060}
+.dark .ex-collision .ex-ttl{color:#50D8F0}
+
+/* Night scrollbar */
+.dark ::-webkit-scrollbar-track{background:#1C0C10}
+.dark ::-webkit-scrollbar-thumb{background:#5A2030}
+.dark ::-webkit-scrollbar-thumb:hover{background:#7A2840}
+
+/* Night conc bars */
+.dark .cb-fill.r{background:linear-gradient(90deg,#50D8F0,#18A8C8)}
+.dark .cb-fill.p{background:linear-gradient(90deg,#60E040,#30B820)}
+.dark .cb-wrap{background:#1E0A10;border-color:#3A1820}
+.dark .cb-lbl.r{color:#50D8F0} .dark .cb-lbl.p{color:#60E040}
+
+/* Night misc */
+.dark .status-msg{background:#1E0A10;border-left-color:#FF8090;color:#F0B8C0}
+.dark .rxn-bar{background:#1E0A10;border-color:#5A2030}
+.dark .sc-desc{background:#1E0A10;border-color:#3A1820}
+.dark .eq-badge{background:rgba(28,12,16,.9);border-color:#5A2030;color:#F0B8C0}
+.dark .tmp-badge{background:rgba(28,12,16,.9);border-color:#5A2030;color:#F0B8C0}
+.dark .tmp-hot{background:rgba(60,20,10,.95);color:#FFB080;border-color:#8A3010}
+.dark .tmp-cold{background:rgba(10,18,40,.95);color:#90B0F8;border-color:#203080}
+.dark .balance-wrap{background:#200A10;border-color:#5A2030} .dark .balance-title{color:#A87880}
+.dark .score-bar{background:#220C12;border-top-color:#3A1820} .dark .sn{color:#FF9EAC}
+.dark .right-toolbar{background:linear-gradient(90deg,#280E14,#2A0E16);border-bottom-color:#5A2030}
+.dark .graph-half+.graph-half{border-top-color:#3A1820} .dark .graph-label{color:#A87880}
+.dark .stats-strip .stat-card{background:var(--stat-bg)}
+
+/* Night control buttons */
+.dark .b-ar{background:#0A2A38;color:#50D8F0} .dark .b-ar:hover{background:#0E3848}
+.dark .b-rr{background:#061820;color:#50D8F0;border-color:#204050} .dark .b-rr:hover{background:#0A2430}
+.dark .b-ap{background:#082010;color:#60E040} .dark .b-ap:hover{background:#0C2A14}
+.dark .b-rp{background:#051008;color:#60E040;border-color:#1A4020} .dark .b-rp:hover{background:#081814}
+.dark .b-tu{background:#3A1808;color:#FFB060} .dark .b-tu:hover{background:#482008}
+.dark .b-td{background:#081428;color:#90B0F8} .dark .b-td:hover{background:#0A1830}
+.dark .b-pu{background:#1A0A30;color:#C090FF} .dark .b-pu:hover{background:#200E3A}
+.dark .b-pd{background:#120838;color:#C090FF;border-color:#402080} .dark .b-pd:hover{background:#180840}
+.dark .b-cat{background:#2A1800;color:#FFD060} .dark .b-cat:hover{background:#362008}
+.dark .b-ign{background:#201018;color:#C0A0A8} .dark .b-ign:hover{background:#281820}
+.dark .b-rst{background:linear-gradient(135deg,#C04060,#E06080);box-shadow:0 0 14px rgba(200,60,90,.4)}
+.dark .sec{background:#220C12;border-color:#3A1820} .dark .sec-title{color:#907080;border-bottom-color:#3A1820}
+.dark .badge.exo{background:#3A1000;color:#FFB060} .dark .badge.endo{background:#000A28;color:#90B0F8}
+
+/* Night toolbar buttons */
+.dark .tbtn{background:#280E14;color:#F0B8C0;border-color:#5A2030}
+.dark .tbtn:hover{background:#380E18;border-color:#FF8090;color:#FFE8EC}
+.dark .tbtn.active{background:#E05870;color:#fff;border-color:#FF8090}
+
+/* Night Regents panel */
+.dark .rp{background:linear-gradient(135deg,#280C14,#200E20);border-color:#FF8090}
+.dark .rp-title{color:#FF9EAC} .dark .rp-lbl{color:#D0A0A8}
+.dark .po{background:#1E0A12;color:#F0B8C0;border-color:#5A2030}
+.dark .po:hover{border-color:#FF8090;color:#FFE8EC}
+.dark .po.sel{background:#E05870;color:#fff;border-color:#FF8090}
+.dark .po.correct{background:#30A820;border-color:#50C840}
+.dark .po.wrong{background:#A02028;border-color:#C03040}
+.dark .reveal-btn{background:linear-gradient(135deg,#D04060,#E05870)}
+.dark .lock-btn{background:linear-gradient(135deg,#5A30A0,#7040C0)}
+.dark .hint-btn{background:linear-gradient(135deg,#2A1A00,#382200);border-color:#C08010;color:#FFD060}
+
+/* Night popup */
+.dark .popup-panel{background:#1E0A12}
+.dark .popup-hdr{background:#280C14;border-bottom-color:#5A2030}
+.dark .popup-title{color:#FF9EAC}
+.dark .popup-close{background:#E05870}
+.dark .ref-hdr{color:#FF9EAC;border-bottom-color:#5A2030}
+.dark .ref-tbl th{background:#280C14;color:#FF9EAC;border-bottom-color:#5A2030}
+.dark .ref-tbl td{color:#F0B8C0;border-bottom-color:#3A1820}
+.dark .ref-tbl tr:hover td{background:#2A0E16}
+.dark .ref-rule{background:#1E0A10;border-color:#3A1820}
+.dark .ref-rtitle{color:#FF9EAC} .dark .ref-rbody{color:#D0A0A8}
+.dark .row-r td{border-left-color:#50D8F0} .dark .row-p td{border-left-color:#60E040}
+.dark .row-t td{border-left-color:#FF9060} .dark .row-pr td{border-left-color:#C090FF}
+.dark .row-s td{border-left-color:#FFD060}
+.dark .sr{color:#50D8F0} .dark .sl{color:#60E040}
+.dark .ky{color:#FF9EAC} .dark .kn{color:#806070}
+
+/* Night rates + toast */
+.dark .rates-lbl{color:#A87880}
+.dark .toggle-sw .slider{background:#5A2030}
+.dark .micro-toast{background:#FFE8EC;color:#1C0C10}
+
+/* Night balance scale */
+.dark .bal-eq-txt{color:#F0B8C0}
+.dark .bal-side-lbl.r{color:#50D8F0} .dark .bal-side-lbl.p{color:#60E040}
+
+/* ── BASE RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--shell-lightest);color:var(--text-dark);
+  display:flex;flex-direction:column;transition:background .4s,color .3s}
+.left,.right,.center{transition:background .4s,border-color .3s}
+
+/* Richer header with depth */
+.hdr{background:linear-gradient(160deg,#8C2018 0%,#B83028 30%,#D85848 65%,#E87868 100%);
+  padding:0 18px;height:56px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:space-between;box-shadow:0 3px 20px rgba(140,32,24,.35),0 1px 0 rgba(255,200,190,.2) inset;
+  gap:10px;flex-wrap:nowrap}
+
+/* ── MICRO-FEEDBACK TOAST ── */
+.micro-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--text-dark);color:#fff;font-family:var(--font);font-weight:700;font-size:.8rem;
+  padding:8px 18px;border-radius:24px;white-space:nowrap;z-index:8000;
+  opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;
+  box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.micro-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.dark .micro-toast{background:#F8EEF4;color:#180A08}
+
+/* ── RATES TOGGLE ── */
+.rates-toggle-wrap{display:flex;align-items:center;gap:6px;padding:0 4px;flex-shrink:0}
+.rates-lbl{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--text-light)}
+.toggle-sw{position:relative;width:34px;height:18px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0}
+.toggle-sw .slider{position:absolute;inset:0;background:var(--border);border-radius:10px;
+  cursor:pointer;transition:.25s}
+.toggle-sw .slider:before{content:'';position:absolute;height:12px;width:12px;left:3px;bottom:3px;
+  background:#fff;border-radius:50%;transition:.25s}
+.toggle-sw input:checked+.slider{background:var(--shell-dark)}
+.toggle-sw input:checked+.slider:before{transform:translateX(16px)}
+
+/* ── HEADER LOGO & TEXT ── */
+.hdr-logo{display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:1}
+.hdr-icon{width:38px;height:38px;background:rgba(255,255,255,.22);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+  border:1px solid rgba(255,255,255,.35);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.hdr-title{font-size:1.12rem;font-weight:900;color:#fff;white-space:nowrap;
+  text-shadow:0 1px 4px rgba(0,0,0,.3);letter-spacing:-.2px}
+.hdr-sub{font-size:.7rem;color:rgba(255,255,255,.98);font-weight:800;letter-spacing:1.1px;
+  text-transform:uppercase;background:rgba(0,0,0,.25);border-radius:6px;
+  padding:2px 9px;display:inline-block;margin-top:3px;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+/* ── SCENARIO / MODE SUB-BAR (below header) ── */
+.sub-bar{
+  background:linear-gradient(90deg,#A02820 0%,#C03838 50%,#A02820 100%);
+  border-bottom:2px solid rgba(0,0,0,.25);
+  padding:5px 18px;flex-shrink:0;display:flex;align-items:center;
+  gap:10px;flex-wrap:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.sub-bar-label{font-size:.6rem;font-weight:800;color:rgba(255,255,255,.7);
+  text-transform:uppercase;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+.dark .sub-bar{background:linear-gradient(90deg,#3A1020 0%,#5A1830 50%,#3A1020 100%);border-bottom-color:rgba(0,0,0,.4)}
+.hdr-icon{width:38px;height:38px;background:rgba(255,255,255,.22);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+  border:1px solid rgba(255,255,255,.35);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.hdr-title{font-size:1.08rem;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;text-shadow:0 1px 4px rgba(0,0,0,.3);letter-spacing:-.2px}
+.hdr-sub{font-size:.68rem;color:rgba(255,255,255,.98);font-weight:800;letter-spacing:1px;
+  text-transform:uppercase;background:rgba(0,0,0,.2);border-radius:6px;
+  padding:2px 8px;display:inline-block;margin-top:2px;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+/* Night mode toggle */
+.night-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  color:#fff;font-family:var(--font);font-weight:800;font-size:.72rem;
+  padding:4px 11px;border-radius:20px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.night-btn:hover{background:rgba(255,255,255,.25)}
+.scenario-sel{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;
+  font-family:var(--font);font-weight:700;font-size:.72rem;padding:5px 10px;border-radius:18px;
+  cursor:pointer;outline:none}
+.scenario-sel option{color:var(--text-dark);background:#fff}
+.mode-toggle{display:flex;background:rgba(255,255,255,.15);border-radius:28px;padding:3px;gap:2px;border:1px solid rgba(255,255,255,.3)}
+.mode-btn{background:transparent;border:none;color:rgba(255,255,255,.75);font-family:var(--font);
+  font-weight:700;font-size:.72rem;padding:4px 12px;border-radius:22px;cursor:pointer;transition:all .18s}
+.mode-btn.active{background:#fff;color:var(--shell-dark)}
+
+/* ── BODY GRID ── */
+.body{display:grid;grid-template-columns:210px 1fr 340px;flex:1;min-height:0;overflow:hidden;
+  height:calc(100vh - 90px);max-height:calc(100vh - 90px)}
+
+/* ── LEFT PANEL ── */
+.left{background:var(--surface);border-right:2px solid var(--border);
+  overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:10px;
+  transition:background .3s,border-color .3s}
+.sec{background:var(--shell-lightest);border:1px solid var(--border);border-radius:var(--rm);
+  padding:10px;transition:background .3s,border-color .3s}
+.sec-title{font-size:.6rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-light);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border);
+  transition:color .3s,border-color .3s}
+.cb{width:100%;display:flex;align-items:center;gap:7px;padding:7px 9px;border:none;
+  border-radius:var(--r);font-family:var(--font);font-weight:700;font-size:.75rem;cursor:pointer;
+  transition:all .15s;margin-bottom:3px;text-align:left}
+.cb:last-child{margin-bottom:0}
+.cb:active{opacity:.75}
+.cb .ci{font-size:.9rem;flex-shrink:0}
+.b-ar{background:var(--react-light);color:#0E5A78} .b-ar:hover{background:#AEE0F4;transform:translateX(2px)}
+.b-rr{background:#E4F5FC;color:#0E5A78;border:1px dashed var(--react-color)} .b-rr:hover{background:var(--react-light);transform:translateX(2px)}
+.b-ap{background:var(--prod-light);color:#1E6010}  .b-ap:hover{background:#BEF0A0;transform:translateX(2px)}
+.b-rp{background:#EEF9E4;color:#1E6010;border:1px dashed var(--prod-color)}  .b-rp:hover{background:var(--prod-light);transform:translateX(2px)}
+.b-tu{background:#FFE8D0;color:#A04800} .b-tu:hover{background:#FFD4B0;transform:translateX(2px)}
+.b-td{background:#DCEEFF;color:#0E2E80} .b-td:hover{background:#C4DBFF;transform:translateX(2px)}
+.b-pu{background:#EEE0FF;color:#5010A0} .b-pu:hover{background:#E0C8FF;transform:translateX(2px)}
+.b-pd{background:#F6F0FF;color:#5010A0;border:1px dashed var(--purple)} .b-pd:hover{background:#EDD8FF;transform:translateX(2px)}
+.b-cat{background:#FFF5CC;color:#7A6000} .b-cat:hover{background:#FFEEA0;transform:translateX(2px)}
+.b-ign{background:#F0F0F0;color:#555}   .b-ign:hover{background:#E4E4E4;transform:translateX(2px)}
+.b-rst{background:linear-gradient(135deg,var(--shell-pink),var(--shell-deep));color:#fff;
+  justify-content:center;padding:9px;border-radius:var(--r);margin-top:2px;box-shadow:var(--s1)}
+.b-rst:hover{opacity:.88}
+.k-box{background:var(--shell-light);border:1px solid var(--border);border-radius:var(--r);padding:8px;text-align:center}
+.k-lbl{font-size:.6rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--text-light);display:block;margin-bottom:3px}
+.k-val{font-family:var(--mono);font-size:1rem;font-weight:700;color:var(--shell-dark);display:block}
+.k-sts{font-size:.68rem;font-weight:700;color:var(--text-mid);display:block;margin-top:2px}
+.badge{display:inline-block;padding:2px 9px;border-radius:18px;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.exo{background:#FFE5CC;color:#A04800} .endo{background:#CCE8FF;color:#0E2E80}
+.p-note{font-size:.6rem;color:var(--text-light);font-weight:700;text-align:center;font-style:italic;padding:0 4px;margin-top:2px}
+
+/* ── CENTER PANEL ── */
+.center{background:var(--shell-lightest);display:flex;flex-direction:column;
+  align-items:center;padding:14px 16px;gap:10px;overflow-y:auto;overflow-x:hidden;
+  transition:background .3s}
+.rxn-bar{background:var(--surface);border:2px solid var(--border);border-radius:var(--rm);
+  padding:8px 18px;font-family:var(--mono);font-size:.92rem;font-weight:700;
+  display:flex;align-items:center;gap:8px;box-shadow:var(--s1);width:100%;max-width:440px;
+  justify-content:center;transition:background .3s,border-color .3s}
+.rt{color:#0E5A78} .pt{color:#1E6010} .arrt{color:var(--shell-dark);font-size:1.2rem}
+.dark .rt{color:#5BB8D4} .dark .pt{color:#6BBE45}
+.sc-desc{background:var(--surface);border:1px solid var(--border);border-radius:18px;
+  padding:2px 12px;font-size:.65rem;font-weight:700;color:var(--text-light);transition:all .3s}
+.rxn-cont{background:var(--surface);border:3px solid var(--shell-mid);border-radius:var(--rl);
+  width:100%;max-width:440px;height:230px;position:relative;overflow:hidden;box-shadow:var(--s3);
+  flex-shrink:0;transition:background .3s,border-color .3s}
+.dark .rxn-cont{background:#1E1220;border-color:#4A2840}
+#pc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.rxn-div{position:absolute;left:50%;top:8%;bottom:8%;width:2px;background:var(--border);transform:translateX(-50%)}
+.side-lbl{position:absolute;top:8px;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;opacity:.55}
+.side-lbl.r{left:10px;color:#0E5A78} .side-lbl.p{right:10px;color:#1E6010}
+.shift-ind{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:4rem;font-weight:900;opacity:0;pointer-events:none;z-index:10;
+  transition:opacity .2s;filter:drop-shadow(0 0 12px currentColor)}
+.shift-ind.show{opacity:1;animation:shift-pop .5s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes shift-pop{
+  0%{transform:translate(-50%,-50%) scale(.3);opacity:0}
+  60%{transform:translate(-50%,-50%) scale(1.25);opacity:1}
+  80%{transform:translate(-50%,-50%) scale(.95)}
+  100%{transform:translate(-50%,-50%) scale(1.08);opacity:1}
+}
+@keyframes shift-pulse{
+  0%,100%{transform:translate(-50%,-50%) scale(1.08)}
+  50%{transform:translate(-50%,-50%) scale(1.18)}
+}
+.shift-ind.pulsing{animation:shift-pulse .7s ease-in-out infinite}
+.sir{color:#3AB84A;text-shadow:0 0 20px rgba(58,184,74,.7),0 0 40px rgba(58,184,74,.4)}
+.sil{color:#3AAED0;text-shadow:0 0 20px rgba(58,174,208,.7),0 0 40px rgba(58,174,208,.4)}
+.sin{color:var(--gold);text-shadow:0 0 20px rgba(245,200,66,.7)}
+.eq-badge{position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:18px;
+  padding:3px 9px;font-size:.62rem;font-weight:800;color:var(--text-mid)}
+.eq-dot{width:7px;height:7px;border-radius:50%;background:#6BBE45;flex-shrink:0}
+.eq-dot.shifting{background:var(--shell-deep)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.eq-dot.shifting{animation:blink .5s infinite}
+.tmp-badge{position:absolute;top:8px;left:10px;display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:18px;
+  padding:3px 9px;font-size:.62rem;font-weight:800;color:var(--text-mid);transition:all .4s}
+.tmp-hot{background:rgba(255,228,200,.95);color:#A04800;border-color:#F0A070}
+.tmp-cold{background:rgba(210,228,255,.95);color:#0E2E80;border-color:#90B0F0}
+.conc-bars{display:flex;gap:12px;width:100%;max-width:440px}
+.cb-wrap{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:7px 9px;box-shadow:var(--s1)}
+.cb-lbl{font-size:.6rem;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px;
+  display:flex;justify-content:space-between;align-items:center}
+.cb-lbl.r{color:#0E5A78} .cb-lbl.p{color:#1E6010}
+.cb-track{height:9px;background:var(--shell-light);border-radius:6px;overflow:hidden}
+.cb-fill{height:100%;border-radius:6px;transition:width .8s cubic-bezier(.34,1.56,.64,1)}
+.cb-fill.r{background:linear-gradient(90deg,#5BB8D4,#2A96B8)}
+.cb-fill.p{background:linear-gradient(90deg,#6BBE45,#48A020)}
+.status-msg{width:100%;max-width:440px;background:var(--surface);border-left:4px solid var(--shell-pink);
+  border-radius:0 var(--r) var(--r) 0;padding:7px 12px;font-size:.76rem;font-weight:700;
+  color:var(--text-mid);min-height:32px;box-shadow:var(--s1);transition:border-color .3s;flex-shrink:0}
+@keyframes pulse-border{0%{box-shadow:0 0 0 0 rgba(244,164,157,.6)}70%{box-shadow:0 0 0 10px rgba(244,164,157,0)}100%{box-shadow:0 0 0 0 rgba(244,164,157,0)}}
+.pulse{animation:pulse-border .6s ease-out}
+
+/* ── BALANCE SCALE ── */
+.balance-wrap{width:100%;max-width:440px;flex-shrink:0;
+  background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rm);
+  padding:8px 10px 6px;box-shadow:var(--s1);transition:background .3s,border-color .3s}
+.dark .balance-wrap{background:#170E1C;border-color:#38204A}
+.balance-title{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--text-light);text-align:center;margin-bottom:4px}
+#balCanvas{display:block;width:100%;height:100px}
+.balance-status-row{display:flex;justify-content:space-between;align-items:center;padding:0 4px;margin-top:2px}
+.bal-side-lbl{font-size:.65rem;font-weight:800;flex:1}
+.bal-side-lbl.r{color:#0E5A78;text-align:left} .dark .bal-side-lbl.r{color:#40C8E0}
+.bal-side-lbl.p{color:#1E6010;text-align:right} .dark .bal-side-lbl.p{color:#50D060}
+.bal-eq-txt{font-size:.65rem;font-weight:900;color:var(--shell-dark);text-align:center;flex:1.2;
+  padding:2px 6px;border-radius:10px;transition:all .3s}
+.bal-eq-txt.tipping-r{background:rgba(107,190,69,.15);color:#1E6010}
+.dark .bal-eq-txt.tipping-r{background:rgba(80,208,96,.2);color:#50D060}
+.bal-eq-txt.tipping-l{background:rgba(91,184,212,.15);color:#0E5A78}
+.dark .bal-eq-txt.tipping-l{background:rgba(64,200,224,.2);color:#40C8E0}
+.bal-eq-txt.at-eq{background:rgba(245,200,66,.1);color:var(--shell-dark)}
+
+/* ── COLLISION FREQUENCY CARD ── */
+.ex-collision{border-left:3px solid var(--teal)}
+.ex-collision .ex-ttl{color:#1E7060}
+.dark .ex-collision .ex-ttl{color:#40C8E0}
+
+/* ── STATS STRIP ── */
+.stats-strip{display:flex;gap:8px;width:100%;max-width:440px;flex-shrink:0}
+.stat-card{flex:1;background:var(--stat-bg);border:1px solid var(--stat-border);border-radius:var(--rm);
+  padding:7px 10px;text-align:center;box-shadow:var(--s1);transition:background .3s,border-color .3s}
+.stat-lbl{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;
+  color:var(--text-light);display:block;margin-bottom:2px}
+.stat-val{font-family:var(--mono);font-size:.88rem;font-weight:700;color:var(--stat-val);display:block;line-height:1.2}
+.stat-sub{font-size:.58rem;font-weight:700;color:var(--text-light);display:block;margin-top:1px}
+.stat-card.changing .stat-val{animation:stat-flash .4s ease-out}
+@keyframes stat-flash{0%{transform:scale(1.18);color:#F5C842}100%{transform:scale(1);color:var(--stat-val)}}
+
+/* ── EXPLAIN DRAWER (in center panel) ── */
+.explain-toggle-btn{
+  width:100%;max-width:440px;display:flex;align-items:center;justify-content:space-between;
+  background:var(--ex-bg);border:1.5px solid var(--ex-border);border-radius:var(--rm);
+  padding:8px 14px;font-family:var(--font);font-weight:800;font-size:.76rem;
+  color:var(--text-mid);cursor:pointer;transition:all .2s;flex-shrink:0;
+  box-shadow:var(--s1)}
+.explain-toggle-btn:hover{border-color:var(--shell-pink);color:var(--shell-dark)}
+.explain-toggle-btn.open{border-color:var(--shell-pink);background:var(--shell-lightest);
+  border-radius:var(--rm) var(--rm) 0 0;border-bottom-color:transparent}
+.etb-left{display:flex;align-items:center;gap:8px}
+.etb-dot{width:8px;height:8px;border-radius:50%;background:var(--shell-mid);transition:background .2s}
+.explain-toggle-btn.open .etb-dot{background:var(--shell-deep)}
+.etb-chevron{font-size:.7rem;transition:transform .25s;color:var(--text-light)}
+.explain-toggle-btn.open .etb-chevron{transform:rotate(180deg)}
+.explain-toggle-btn.has-content .etb-dot{background:var(--shell-deep)}
+
+.explain-drawer{
+  width:100%;max-width:440px;max-height:0;overflow:hidden;
+  background:var(--ex-bg);border:1.5px solid var(--shell-pink);border-top:none;
+  border-radius:0 0 var(--rm) var(--rm);
+  transition:max-height .32s cubic-bezier(.4,0,.2,1);flex-shrink:0}
+.explain-drawer.open{max-height:480px}
+.ex-pane{display:flex;flex-direction:column;overflow-y:auto;max-height:480px}
+.ex-card{background:var(--ex-bg);border-top:1px solid var(--ex-border);padding:10px 14px;flex-shrink:0}
+.ex-card:first-child{border-top:none}
+.ex-ttl{font-size:.58rem;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;
+  color:var(--text-light);margin-bottom:4px}
+.ex-card p{font-size:.78rem;font-weight:600;color:var(--text-mid);line-height:1.5}
+.ex-k{border-left:3px solid var(--gold)}
+.ex-k .ex-ttl{color:#7A6000}
+.dark .ex-k .ex-ttl{color:#C8A030}
+.ex-tip{border-left:3px solid var(--gold)}
+.ex-tip .ex-ttl{color:#7A6000}
+.dark .ex-tip .ex-ttl{color:#C8A030}
+@keyframes slide-in{from{transform:translateX(14px);opacity:0}to{transform:translateX(0);opacity:1}}
+.slide-in{animation:slide-in .28s ease-out}
+
+/* ── DARK MODE COMPONENT OVERRIDES ── */
+.dark .b-ar{background:#1A3A44;color:#5BB8D4} .dark .b-ar:hover{background:#1E4858}
+.dark .b-rr{background:#142830;color:#5BB8D4;border-color:#2A5060} .dark .b-rr:hover{background:#1A3844}
+.dark .b-ap{background:#1A3016;color:#6BBE45} .dark .b-ap:hover{background:#1E3C1A}
+.dark .b-rp{background:#102010;color:#6BBE45;border-color:#2A5030} .dark .b-rp:hover{background:#162816}
+.dark .b-tu{background:#3A2010;color:#E09040} .dark .b-tu:hover{background:#462A14}
+.dark .b-td{background:#101A30;color:#7090E0} .dark .b-td:hover{background:#141E3A}
+.dark .b-pu{background:#2A1840;color:#B090E0} .dark .b-pu:hover{background:#341E4E}
+.dark .b-pd{background:#1E1030;color:#B090E0;border-color:#4A3070} .dark .b-pd:hover{background:#241438}
+.dark .b-cat{background:#302010;color:#D4A030} .dark .b-cat:hover{background:#3C2814}
+.dark .b-ign{background:#282028;color:#A090A0} .dark .b-ign:hover{background:#302830}
+.dark .b-rst{background:linear-gradient(135deg,var(--shell-deep),var(--shell-darker))}
+.dark .badge.exo{background:#3A1800;color:#E09040}
+.dark .badge.endo{background:#001830;color:#7090E0}
+.dark .status-msg,.dark .rxn-bar,.dark .sc-desc{background:var(--surface)}
+.dark .right-toolbar{background:var(--shell-light)}
+.dark .tbtn{background:var(--surface);color:var(--text-mid)}
+.dark .tbtn.active{background:var(--shell-pink);color:#fff}
+.dark .popup-hdr{background:var(--shell-light)}
+.dark .rp{background:#201428}
+.dark .po{background:var(--surface)}
+.dark .eq-badge,.dark .tmp-badge{background:rgba(26,10,20,.9);border-color:#4A2840;color:var(--text-mid)}
+.dark .conc-bars .cb-wrap{background:var(--surface)}
+.dark .score-bar{background:var(--shell-light)}
+
+/* ── RIGHT PANEL ── */
+.right{background:var(--surface);border-left:2px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* Toolbar */
+.right-toolbar{display:flex;align-items:center;gap:6px;padding:6px 10px;
+  background:var(--shell-light);border-bottom:2px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+.tbtn{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;
+  font-family:var(--font);font-weight:800;font-size:.68rem;color:var(--text-mid);
+  padding:4px 11px;cursor:pointer;transition:all .18s;white-space:nowrap}
+.tbtn:hover{border-color:var(--shell-pink);color:var(--shell-dark)}
+.tbtn.active{background:var(--shell-pink);color:#fff;border-color:var(--shell-deep)}
+.toolbar-sep{width:1px;height:18px;background:var(--border);flex-shrink:0}
+
+/* Split graphs — both always visible */
+.graphs-area{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.graph-half{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.graph-half+.graph-half{border-top:2px solid var(--border)}
+.graph-label{font-size:.55rem;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--text-light);padding:3px 10px 0;flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between}
+.graph-label-txt{flex:1}
+.ch-pane{flex:1;padding:4px 10px 6px;overflow:hidden;position:relative;min-height:0}
+#cc{display:block;width:100%;height:100%}
+.pe-pane{flex:1;padding:2px 10px 6px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+#pe{flex:1;width:100%;min-height:60px;display:block}
+
+/* ── EXPAND BUTTON ── */
+.expand-btn{
+  background:none;border:1px solid var(--border);border-radius:5px;
+  color:var(--text-light);cursor:pointer;font-size:.65rem;padding:1px 5px;
+  line-height:1.4;transition:all .15s;flex-shrink:0;margin-left:4px}
+.expand-btn:hover{background:var(--shell-light);border-color:var(--shell-pink);color:var(--shell-dark)}
+.dark .expand-btn{border-color:#5A2030;color:#A87880}
+.dark .expand-btn:hover{background:#280C14;border-color:#FF8090;color:#FF9EAC}
+
+/* ── GRAPH LIGHTBOX MODAL ── */
+.graph-modal{
+  display:none;position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.72);backdrop-filter:blur(3px);
+  align-items:center;justify-content:center}
+.graph-modal.open{display:flex;animation:modal-in .2s ease-out}
+@keyframes modal-in{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.graph-modal-inner{
+  background:var(--surface);border-radius:var(--rl);
+  box-shadow:0 24px 80px rgba(0,0,0,.5);
+  width:min(92vw,1100px);height:min(86vh,720px);
+  display:flex;flex-direction:column;overflow:hidden;position:relative}
+.dark .graph-modal-inner{background:#1E0A10;border:1px solid #5A2030}
+.graph-modal-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px 8px;border-bottom:1px solid var(--border);flex-shrink:0;
+  background:var(--shell-lightest)}
+.dark .graph-modal-hdr{background:#280C14;border-bottom-color:#5A2030}
+.graph-modal-title{font-size:.82rem;font-weight:900;text-transform:uppercase;
+  letter-spacing:1px;color:var(--text-mid)}
+.dark .graph-modal-title{color:#F0B8C0}
+.graph-modal-close{
+  background:var(--shell-deep);color:#fff;border:none;border-radius:6px;
+  font-size:.78rem;font-weight:800;padding:4px 12px;cursor:pointer;transition:all .15s}
+.graph-modal-close:hover{background:var(--shell-dark)}
+.graph-modal-canvas-wrap{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  padding:18px 24px 14px;min-height:0;overflow:hidden}
+#cc-large,#pe-large{display:block;width:100%;height:100%;max-height:100%}
+
+/* Regents predict */
+.rp{background:linear-gradient(135deg,var(--shell-light),#EFF8FF);
+  border:2px solid var(--shell-pink);border-radius:var(--rm);padding:10px;
+  margin:6px 10px 0;display:none;flex-shrink:0}
+.rp.visible{display:block}
+.rp-title{font-weight:900;font-size:.78rem;color:var(--shell-dark);margin-bottom:8px}
+.rp-row{margin-bottom:7px}
+.rp-lbl{font-size:.62rem;font-weight:800;color:var(--text-mid);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.rp-opts{display:flex;gap:5px;flex-wrap:wrap}
+.po{background:var(--surface);border:2px solid var(--border);border-radius:18px;
+  padding:3px 10px;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .14s;color:var(--text-mid)}
+.po:hover{border-color:var(--shell-pink);color:var(--shell-dark)}
+.po.sel{background:var(--shell-pink);color:#fff;border-color:var(--shell-deep)}
+.po.correct{background:#6BBE45;color:#fff;border-color:#3A9010}
+.po.wrong{background:#E06060;color:#fff;border-color:#A03030}
+.reveal-btn{width:100%;background:linear-gradient(135deg,var(--shell-dark),var(--shell-deep));
+  color:#fff;border:none;border-radius:var(--r);font-family:var(--font);font-weight:800;
+  font-size:.76rem;padding:7px;cursor:pointer;transition:all .18s;margin-top:4px}
+.reveal-btn:hover{opacity:.88} .reveal-btn:disabled{opacity:.38;cursor:default}
+.hint-btn{width:100%;background:linear-gradient(135deg,#FFF5CC,#FFF0AA);color:#7A6000;
+  border:1.5px solid #E8C840;border-radius:var(--r);font-family:var(--font);font-weight:800;
+  font-size:.72rem;padding:5px;cursor:pointer;transition:all .18s;margin-top:4px}
+.hint-btn:hover{background:#FFEEA0} .hint-btn:disabled{opacity:.35;cursor:default}
+.hint-toast{background:linear-gradient(135deg,#FFFBEA,#FFF8D6);border:2px solid #F5C842;
+  border-radius:var(--rm);padding:8px 10px;font-size:.74rem;font-weight:700;color:#5A4000;
+  margin:5px 10px 0;box-shadow:var(--s1);flex-shrink:0}
+.hint-ttl{font-size:.6rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#9A7000;margin-bottom:3px}
+
+/* ── SLIDE-IN POPUP PANELS (Ref Card only) ── */
+.popup-panel{position:absolute;inset:0;background:var(--surface);z-index:50;
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:translateX(105%);transition:transform .26s cubic-bezier(.4,0,.2,1);
+  box-shadow:-4px 0 20px rgba(0,0,0,.18)}
+.popup-panel.open{transform:translateX(0)}
+.popup-hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;background:var(--shell-light);border-bottom:2px solid var(--border);flex-shrink:0}
+.popup-title{font-size:.76rem;font-weight:900;color:var(--shell-dark)}
+.popup-close{background:var(--shell-pink);border:none;border-radius:50%;width:22px;height:22px;
+  color:#fff;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-weight:900;line-height:1;transition:opacity .15s;flex-shrink:0}
+.popup-close:hover{opacity:.75}
+
+/* Ref card in popup */
+.ref-pane{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px}
+.ref-hdr{font-size:.72rem;font-weight:900;color:var(--shell-dark);display:flex;align-items:center;
+  justify-content:space-between;padding-bottom:7px;border-bottom:2px solid var(--border);flex-shrink:0}
+.print-btn{background:var(--shell-pink);color:#fff;border:none;border-radius:18px;
+  font-family:var(--font);font-weight:800;font-size:.65rem;padding:3px 11px;cursor:pointer}
+.print-btn:hover{opacity:.85}
+.ref-tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);flex-shrink:0}
+.ref-tbl{width:100%;border-collapse:collapse;font-size:.68rem;font-family:var(--font)}
+.ref-tbl th{background:var(--shell-light);color:var(--shell-dark);font-weight:900;font-size:.6rem;
+  text-transform:uppercase;letter-spacing:.4px;padding:6px 7px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap}
+.ref-tbl td{padding:5px 7px;border-bottom:1px solid var(--border);vertical-align:middle;font-weight:600;color:var(--text-dark);line-height:1.3}
+.ref-tbl tr:last-child td{border-bottom:none}
+.ref-tbl tr:hover td{background:var(--shell-lightest)}
+.row-r td{border-left:3px solid var(--react-color)} .row-p td{border-left:3px solid var(--prod-color)}
+.row-t td{border-left:3px solid #F0A060} .row-pr td{border-left:3px solid var(--purple)}
+.row-s td{border-left:3px solid var(--gold)}
+.sr{color:#0E5A78;font-weight:800} .sl{color:#1E6010;font-weight:800}
+.ky{color:var(--shell-dark);font-weight:900} .kn{color:#999}
+.ref-rules{display:flex;flex-direction:column;gap:7px}
+.ref-rule{background:var(--shell-lightest);border:1px solid var(--border);border-radius:var(--r);padding:8px 11px}
+.ref-rtitle{font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:.8px;color:var(--shell-dark);margin-bottom:3px}
+.ref-rbody{font-size:.72rem;font-weight:600;color:var(--text-mid);line-height:1.5}
+
+/* Score bar */
+.score-bar{background:var(--shell-light);border-top:1px solid var(--border);
+  padding:5px 12px;display:none;align-items:center;gap:12px;font-size:.68rem;font-weight:800;color:var(--text-mid);flex-shrink:0}
+.si{display:flex;align-items:center;gap:4px}
+.sn{color:var(--shell-dark);font-size:.85rem}
+@keyframes fire{0%,100%{transform:scale(1)}50%{transform:scale(1.35)}}
+.fire{animation:fire .55s ease-in-out infinite;display:inline-block}
+
+/* Lock Answer button */
+.lock-btn{width:100%;background:linear-gradient(135deg,#8A60CC,#6840B0);
+  color:#fff;border:none;border-radius:var(--r);font-family:var(--font);font-weight:800;
+  font-size:.78rem;padding:8px;cursor:pointer;transition:all .18s;margin-top:4px}
+.lock-btn:hover{opacity:.88}
+
+/* Rates overlay label on chart */
+.rates-label{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;
+  padding:2px 4px}
+
+/* Overlays */
+.cel-overlay{position:fixed;inset:0;pointer-events:none;z-index:9999;display:flex;align-items:center;justify-content:center}
+.cel-burst{font-size:3rem;font-weight:900;color:#fff;background:linear-gradient(135deg,#6BBE45,#3A9010);
+  padding:16px 30px;border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.22);
+  opacity:0;transform:scale(.5);
+  animation:burst-in .45s cubic-bezier(.34,1.56,.64,1) forwards,burst-out .38s 1.2s ease-in forwards}
+@keyframes burst-in{to{opacity:1;transform:scale(1)}}
+@keyframes burst-out{to{opacity:0;transform:scale(1.08) translateY(-16px)}}
+.wrong-flash{position:fixed;inset:0;background:rgba(220,60,60,.12);pointer-events:none;z-index:9998;animation:wf .6s ease-out forwards}
+@keyframes wf{to{opacity:0}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--shell-mid);border-radius:4px}
+
+/* Print */
+@media print{
+  .hdr,.sub-bar,.left,.center,.rp,.score-bar,.right-toolbar,.popup-panel:not(#popupRef){display:none!important}
+  .right{border:none;width:100%;position:static}
+  #popupRef{display:flex!important;transform:none!important;position:static;box-shadow:none}
+  .ref-pane{padding:0}
+  .print-btn{display:none}
+  body,html{overflow:visible;height:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-logo">
+    <div class="hdr-icon">⚗️</div>
+    <div>
+      <div class="hdr-title">Level Up: Le Châtelier's Principle</div>
+      <div class="hdr-sub">Dr. Sacrestano · NYS Regents Chemistry</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btnLearn" onclick="setMode('learn')">🎓 Learn</button>
+      <button class="mode-btn" id="btnRegents" onclick="setMode('regents')">🏆 Regents</button>
+    </div>
+    <button class="night-btn" id="nightBtn" onclick="toggleNight()">🌙 Night</button>
+  </div>
+</header>
+
+<!-- SUB-BAR: Scenario Selector -->
+<div class="sub-bar">
+  <span class="sub-bar-label">⚗️ Reaction:</span>
+  <select class="scenario-sel" id="scenSel" style="flex:1;max-width:480px">
+    <option value="simple">1. Simple System  (A ⇌ B)</option>
+    <option value="co">2. Exothermic System  (2CO + O₂ ⇌ 2CO₂,  ΔH &lt; 0)</option>
+    <option value="no">3. Endothermic System  (N₂ + O₂ ⇌ 2NO,  ΔH &gt; 0)</option>
+    <option value="haber">4. Haber Process  (N₂ + 3H₂ ⇌ 2NH₃,  ΔH &lt; 0)</option>
+    <option value="hi">5. Equal Moles System  (H₂ + I₂ ⇌ 2HI,  no pressure effect)</option>
+  </select>
+</div>
+
+<!-- BODY -->
+<div class="body">
+<!-- Micro-feedback toast -->
+<div class="micro-toast" id="microToast"></div>
+
+  <!-- LEFT -->
+  <aside class="left">
+    <div class="sec">
+      <div class="sec-title">⚗️ Concentration</div>
+      <button class="cb b-ar" onclick="applyStress('add-reactant')"><span class="ci">➕</span>Add Reactant</button>
+      <button class="cb b-rr" onclick="applyStress('rem-reactant')"><span class="ci">➖</span>Remove Reactant</button>
+      <button class="cb b-ap" onclick="applyStress('add-product')"><span class="ci">➕</span>Add Product</button>
+      <button class="cb b-rp" onclick="applyStress('rem-product')"><span class="ci">➖</span>Remove Product</button>
+    </div>
+    <div class="sec">
+      <div class="sec-title">🌡️ Temperature</div>
+      <button class="cb b-tu" onclick="applyStress('temp-up')"><span class="ci">🔥</span>Increase Temp</button>
+      <button class="cb b-td" onclick="applyStress('temp-down')"><span class="ci">❄️</span>Decrease Temp</button>
+    </div>
+    <div class="sec">
+      <div class="sec-title">⬛ Pressure / Volume</div>
+      <button class="cb b-pu" onclick="applyStress('press-up')"><span class="ci">🔼</span>Increase Pressure</button>
+      <button class="cb b-pd" onclick="applyStress('press-down')"><span class="ci">🔽</span>Decrease Pressure</button>
+      <div class="p-note" id="pNote">Equal moles — no pressure effect</div>
+    </div>
+    <div class="sec">
+      <div class="sec-title">🔬 Special</div>
+      <button class="cb b-cat" onclick="applyStress('catalyst')"><span class="ci">✨</span>Add Catalyst</button>
+      <button class="cb b-ign" onclick="applyStress('inert')"><span class="ci">💨</span>Add Inert Gas</button>
+    </div>
+    <div style="text-align:center;padding:2px 0">
+      <span class="badge exo" id="thermoBadge">Exothermic ΔH &lt; 0</span>
+    </div>
+    <button class="cb b-rst" onclick="resetSystem()">🔄 Reset System</button>
+  </aside>
+
+  <!-- CENTER -->
+  <main class="center">
+    <div class="rxn-bar">
+      <span class="rt" id="rLbl">A</span>
+      <span class="arrt">⇌</span>
+      <span class="pt" id="pLbl">B</span>
+    </div>
+    <div class="sc-desc" id="scDesc">Simple one-to-one equilibrium</div>
+
+    <div class="rxn-cont" id="rxnCont">
+      <canvas id="pc"></canvas>
+      <div class="rxn-div"></div>
+      <div class="side-lbl r">Reactants</div>
+      <div class="side-lbl p">Products</div>
+      <div class="shift-ind" id="shiftInd">▶▶</div>
+      <div class="eq-badge"><div class="eq-dot" id="eqDot"></div><span id="eqLbl">Equilibrium</span></div>
+      <div class="tmp-badge" id="tmpBadge">🌡️ Normal Temp</div>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+      <div class="stat-card" id="statDH">
+        <span class="stat-lbl">ΔH (kJ)</span>
+        <span class="stat-val" id="statDHval">−30</span>
+        <span class="stat-sub" id="statDHsub">Exothermic</span>
+      </div>
+      <div class="stat-card" id="statTemp">
+        <span class="stat-lbl">Temperature</span>
+        <span class="stat-val" id="statTempval">298 K</span>
+        <span class="stat-sub" id="statTempsub">25 °C · Normal</span>
+      </div>
+      <div class="stat-card" id="statPress">
+        <span class="stat-lbl">Pressure</span>
+        <span class="stat-val" id="statPressval">101.3 kPa</span>
+        <span class="stat-sub" id="statPresssub">Standard</span>
+      </div>
+      <div class="stat-card" id="statKcard" style="display:none">
+        <span class="stat-lbl">K (eq. const)</span>
+        <span class="stat-val" id="kVal">1.00</span>
+        <span class="stat-sub" id="kSts">At Equilibrium</span>
+      </div>
+    </div>
+
+    <!-- Balance Scale -->
+    <div class="balance-wrap">
+      <div class="balance-title">⚖️ Equilibrium Balance</div>
+      <canvas id="balCanvas"></canvas>
+      <div class="balance-status-row">
+        <span class="bal-side-lbl r" id="balLblR">Reactants</span>
+        <span class="bal-eq-txt at-eq" id="balEqTxt">⚖️ Balanced</span>
+        <span class="bal-side-lbl p" id="balLblP">Products</span>
+      </div>
+    </div>
+
+    <!-- Concentration bars -->
+    <div class="conc-bars">
+      <div class="cb-wrap">
+        <div class="cb-lbl r"><span id="rBarLbl">Reactants</span><span id="rBarVal">5.0 M</span></div>
+        <div class="cb-track"><div class="cb-fill r" id="rBar" style="width:50%"></div></div>
+      </div>
+      <div class="cb-wrap">
+        <div class="cb-lbl p"><span id="pBarLbl">Products</span><span id="pBarVal">5.0 M</span></div>
+        <div class="cb-track"><div class="cb-fill p" id="pBar" style="width:50%"></div></div>
+      </div>
+    </div>
+
+    <!-- Status message -->
+    <div class="status-msg" id="statusMsg">🔬 System at equilibrium. Apply a stress to observe Le Châtelier's Principle!</div>
+
+    <!-- Explain toggle button -->
+    <button class="explain-toggle-btn" id="explainToggleBtn" onclick="toggleExplain()">
+      <span class="etb-left"><span class="etb-dot"></span>💡 Explanation</span>
+      <span class="etb-chevron">▼</span>
+    </button>
+
+    <!-- Explain drawer (slides open below button) -->
+    <div class="explain-drawer" id="explainDrawer">
+      <div class="ex-pane" id="exPane">
+        <div class="ex-card slide-in">
+          <div class="ex-ttl">🔬 What happened?</div>
+          <p id="exWhat">System at equilibrium. Forward and reverse rates are equal.</p>
+        </div>
+        <div class="ex-card slide-in">
+          <div class="ex-ttl">↔️ System Response</div>
+          <p id="exResp">No stress applied yet. Use the controls on the left!</p>
+        </div>
+        <div class="ex-card slide-in">
+          <div class="ex-ttl">⚖️ Shift Direction</div>
+          <p id="exShift">No shift. The system is balanced.</p>
+        </div>
+        <div class="ex-card ex-k slide-in" style="display:none">
+          <div class="ex-ttl">📐 Equilibrium Constant (K)</div>
+          <p id="exK">K unchanged. Only temperature changes K.</p>
+        </div>
+        <div class="ex-card ex-tip slide-in">
+          <div class="ex-ttl">🏆 Regents Exam Tip</div>
+          <p id="exTip">Apply a stress to see a targeted Regents tip!</p>
+        </div>
+        <div class="ex-card ex-collision slide-in">
+          <div class="ex-ttl">⚡ Collision Frequency & Reaction Rates</div>
+          <p id="exCollision">At equilibrium, the forward and reverse reaction rates are equal because molecular collisions in both directions occur at the same frequency. Apply a stress to see how collision frequency changes!</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- RIGHT -->
+  <aside class="right">
+
+    <!-- Toolbar -->
+    <div class="right-toolbar">
+      <button class="tbtn" id="btnRef" onclick="togglePopup('ref')">📋 Ref Card</button>
+      <div class="toolbar-sep"></div>
+      <div class="rates-toggle-wrap">
+        <span class="rates-lbl">⚡ Show Rates</span>
+        <label class="toggle-sw"><input type="checkbox" id="ratesToggle" onchange="toggleRates()"><span class="slider"></span></label>
+      </div>
+      <div class="toolbar-sep"></div>
+      <span style="font-size:.6rem;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.8px">📈 Conc · ⚡ PE</span>
+    </div>
+
+    <!-- Regents predict -->
+    <div class="rp" id="regPanel">
+      <div class="rp-title">🏆 Make Your Prediction First!</div>
+      <div class="rp-row">
+        <div class="rp-lbl">Equilibrium will shift:</div>
+        <div class="rp-opts">
+          <div class="po" onclick="selPredict('shift','right',this)">→ Right</div>
+          <div class="po" onclick="selPredict('shift','left',this)">← Left</div>
+          <div class="po" onclick="selPredict('shift','none',this)">No Shift</div>
+        </div>
+      </div>
+      <!-- K prediction row hidden (not NYS Regents) -->
+
+      <!-- Confidence step (hidden until predictions made) -->
+      <div id="confStep" style="display:none;margin-bottom:6px">
+        <div class="rp-lbl" style="margin-bottom:5px">How confident are you?</div>
+        <div class="rp-opts">
+          <div class="po" id="confHigh" onclick="selConf('high',this)">🟢 High</div>
+          <div class="po" id="confMed"  onclick="selConf('med',this)">🟡 Medium</div>
+          <div class="po" id="confLow"  onclick="selConf('low',this)">🔴 Low</div>
+        </div>
+      </div>
+
+      <!-- Lock Answer button (shown after confidence selected) -->
+      <button class="lock-btn" id="lockBtn" onclick="lockAnswer()" style="display:none">🔒 Lock Answer</button>
+      <button class="reveal-btn" id="revBtn" onclick="revealAnswer()" disabled style="display:none">🔍 Reveal Answer</button>
+      <button class="hint-btn" id="hintBtn" onclick="useHint()">💡 Use Hint <span id="hintCnt">(3 left)</span></button>
+    </div>
+
+    <!-- Split graphs area: Conc on top, PE on bottom — always both visible -->
+    <div class="graphs-area">
+      <div class="graph-half">
+        <div class="graph-label">
+          <span class="graph-label-txt">📈 Concentration vs Time</span>
+          <button class="expand-btn" onclick="openGraphModal('conc')" title="Expand graph">⤢ Expand</button>
+        </div>
+        <div class="ch-pane"><canvas id="cc"></canvas></div>
+      </div>
+      <div class="graph-half">
+        <div class="graph-label">
+          <span class="graph-label-txt">⚡ Potential Energy Diagram</span>
+          <button class="expand-btn" onclick="openGraphModal('pe')" title="Expand graph">⤢ Expand</button>
+        </div>
+        <div class="pe-pane"><canvas id="pe"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Graph Lightbox Modal -->
+    <div class="graph-modal" id="graphModal" onclick="handleModalBackdrop(event)">
+      <div class="graph-modal-inner">
+        <div class="graph-modal-hdr">
+          <span class="graph-modal-title" id="graphModalTitle">Graph</span>
+          <button class="graph-modal-close" onclick="closeGraphModal()">✕ Close</button>
+        </div>
+        <div class="graph-modal-canvas-wrap" id="graphModalCanvasWrap">
+          <canvas id="cc-large"></canvas>
+          <canvas id="pe-large" style="display:none"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score bar -->
+    <div class="score-bar" id="scoreBar">
+      <div class="si">✅ <span class="sn" id="scCorrect">0</span> Correct</div>
+      <div class="si">❌ <span class="sn" id="scWrong">0</span> Wrong</div>
+      <div class="si" id="streakItem">🔥 Streak: <span class="sn" id="scStreak">0</span></div>
+    </div>
+
+    <!-- POPUP: Reference Card only -->
+    <div class="popup-panel" id="popupRef">
+      <div class="popup-hdr">
+        <span class="popup-title">📋 Regents Reference Card</span>
+        <button class="popup-close" onclick="togglePopup('ref')">✕</button>
+      </div>
+      <div class="ref-pane">
+        <div class="ref-hdr">Le Châtelier's Principle <button class="print-btn" onclick="window.print()">🖨️ Print</button></div>
+        <div class="ref-tbl-wrap">
+          <table class="ref-tbl">
+            <thead><tr><th>Stress</th><th>Shift</th><th>Key Fact</th></tr></thead>
+            <tbody>
+              <tr class="row-r"><td>➕ Add Reactant</td><td class="sr">→ Right</td><td>System shifts right to restore balance</td></tr>
+              <tr class="row-r"><td>➖ Remove Reactant</td><td class="sl">← Left</td><td>System shifts left to restore balance</td></tr>
+              <tr class="row-p"><td>➕ Add Product</td><td class="sl">← Left</td><td>System shifts left to restore balance</td></tr>
+              <tr class="row-p"><td>➖ Remove Product</td><td class="sr">→ Right</td><td>Drives forward — used in industry!</td></tr>
+              <tr class="row-t"><td>🔥 Increase Temp</td><td>Exo:← / Endo:→</td><td>Heat = product(exo) or reactant(endo)</td></tr>
+              <tr class="row-t"><td>❄️ Decrease Temp</td><td>Exo:→ / Endo:←</td><td>Only stress that shifts AND favors a direction</td></tr>
+              <tr class="row-pr"><td>🔼 Increase Pressure</td><td>→ Fewer mol side</td><td>Only if gas moles unequal</td></tr>
+              <tr class="row-pr"><td>🔽 Decrease Pressure</td><td>→ More mol side</td><td>No effect if equal moles</td></tr>
+              <tr class="row-s"><td>✨ Add Catalyst</td><td>↔ No Shift</td><td>Lowers Ea both ways — faster only!</td></tr>
+              <tr class="row-s"><td>💨 Add Inert Gas</td><td>↔ No Shift</td><td>No effect at constant volume</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-rules">
+          <div class="ref-rule"><div class="ref-rtitle">⚡ Golden Rule</div>
+            <div class="ref-rbody">A disturbed equilibrium shifts to <strong>partially counteract</strong> the stress — never fully undoes it.</div></div>
+          <div class="ref-rule"><div class="ref-rtitle">🏭 Haber Process</div>
+            <div class="ref-rbody">N₂+3H₂ ⇌ 2NH₃ · ΔH=−92 kJ · 4mol→2mol<br>Best yield: <strong>high pressure + low temp</strong> + catalyst for speed</div></div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// SCENARIOS
+// ═══════════════════════════════════════════════════
+const SC = {
+  // ── General ──
+  simple:{ name:'A ⇌ B (exo)', rLbl:'A', pLbl:'B', isExo:true, gasEffect:false, pFavRight:true,
+    dH:-30, EaF:80, EaR:110, iR:5.0, iP:5.0, K:1.0,
+    desc:'Simple exothermic equilibrium' },
+  endo:{ name:'A ⇌ B (endo)', rLbl:'A', pLbl:'B', isExo:false, gasEffect:false, pFavRight:true,
+    dH:30, EaF:110, EaR:80, iR:5.0, iP:5.0, K:1.0,
+    desc:'Simple endothermic equilibrium — heat is a reactant' },
+
+  // ── Combustion / Oxidation ──
+  co:{ name:'2CO+O₂ ⇌ 2CO₂', rLbl:'2CO + O₂', pLbl:'2CO₂', isExo:true, gasEffect:true, pFavRight:true,
+    dH:-566, EaF:90, EaR:656, iR:6.0, iP:4.0, K:0.67,
+    desc:'Table I · ΔH = −566 kJ · 3 mol gas → 2 mol gas' },
+  no:{ name:'N₂+O₂ ⇌ 2NO', rLbl:'N₂ + O₂', pLbl:'2NO', isExo:false, gasEffect:false, pFavRight:true,
+    dH:182.6, EaF:130, EaR:60, iR:6.5, iP:3.5, K:0.54,
+    desc:'Table I · ΔH = +182.6 kJ · equal moles gas · smog formation' },
+  no2:{ name:'N₂+2O₂ ⇌ 2NO₂', rLbl:'N₂ + 2O₂', pLbl:'2NO₂', isExo:false, gasEffect:true, pFavRight:false,
+    dH:66.4, EaF:120, EaR:68, iR:6.0, iP:4.0, K:0.67,
+    desc:'Table I · ΔH = +66.4 kJ · 3 mol gas → 2 mol gas · endothermic' },
+  h2og:{ name:'2H₂+O₂ ⇌ 2H₂O(g)', rLbl:'2H₂ + O₂', pLbl:'2H₂O(g)', isExo:true, gasEffect:true, pFavRight:true,
+    dH:-483.6, EaF:95, EaR:579, iR:5.5, iP:4.5, K:0.82,
+    desc:'Table I · ΔH = −483.6 kJ · 3 mol gas → 2 mol gas' },
+  h2ol:{ name:'2H₂+O₂ ⇌ 2H₂O(ℓ)', rLbl:'2H₂ + O₂', pLbl:'2H₂O(ℓ)', isExo:true, gasEffect:true, pFavRight:true,
+    dH:-571.6, EaF:95, EaR:667, iR:5.5, iP:4.5, K:0.82,
+    desc:'Table I · ΔH = −571.6 kJ · 3 mol gas → liquid product' },
+
+  // ── Synthesis / Decomposition ──
+  haber:{ name:'N₂+3H₂ ⇌ 2NH₃', rLbl:'N₂ + 3H₂', pLbl:'2NH₃', isExo:true, gasEffect:true, pFavRight:true,
+    dH:-91.8, EaF:100, EaR:192, iR:6.0, iP:4.0, K:0.67,
+    desc:'Table I · ΔH = −91.8 kJ · 4 mol gas → 2 mol gas · Haber Process' },
+  c2h6:{ name:'2C+3H₂ ⇌ C₂H₆', rLbl:'2C + 3H₂', pLbl:'C₂H₆(g)', isExo:true, gasEffect:true, pFavRight:true,
+    dH:-84.0, EaF:96, EaR:180, iR:6.0, iP:4.0, K:0.67,
+    desc:'Table I · ΔH = −84.0 kJ · 3 mol H₂ gas → 1 mol gas (C is solid)' },
+  c2h4:{ name:'2C+2H₂ ⇌ C₂H₄', rLbl:'2C + 2H₂', pLbl:'C₂H₄(g)', isExo:false, gasEffect:true, pFavRight:false,
+    dH:52.4, EaF:112, EaR:78, iR:6.0, iP:4.0, K:0.67,
+    desc:'Table I · ΔH = +52.4 kJ · 2 mol H₂ gas → 1 mol gas (C solid)' },
+  c2h2:{ name:'2C+H₂ ⇌ C₂H₂', rLbl:'2C + H₂', pLbl:'C₂H₂(g)', isExo:false, gasEffect:false, pFavRight:true,
+    dH:227.4, EaF:140, EaR:60, iR:6.0, iP:4.0, K:0.67,
+    desc:'Table I · ΔH = +227.4 kJ · 1 mol H₂ → 1 mol gas (C solid, equal gas)' },
+  hi:{ name:'H₂+I₂ ⇌ 2HI', rLbl:'H₂ + I₂', pLbl:'2HI', isExo:false, gasEffect:false, pFavRight:true,
+    dH:53.0, EaF:115, EaR:82, iR:5.0, iP:5.0, K:1.0,
+    desc:'Table I · ΔH = +53.0 kJ · equal moles gas · endothermic' },
+  pcl5:{ name:'PCl₅ ⇌ PCl₃+Cl₂', rLbl:'PCl₅', pLbl:'PCl₃+Cl₂', isExo:false, gasEffect:true, pFavRight:false,
+    dH:88, EaF:120, EaR:32, iR:7.0, iP:3.0, K:0.43,
+    desc:'ΔH = +88 kJ · 1 mol gas → 2 mol gas · endothermic' },
+
+  // ── Dissolution reactions (Table I) ──
+  kno3:{ name:'KNO₃(s) ⇌ K⁺+NO₃⁻', rLbl:'KNO₃(s)', pLbl:'K⁺ + NO₃⁻', isExo:false, gasEffect:false, pFavRight:true,
+    dH:34.89, EaF:60, EaR:40, iR:6.5, iP:3.5, K:0.54,
+    desc:'Table I · ΔH = +34.89 kJ · dissolving in water · endothermic' },
+  naoh:{ name:'NaOH(s) ⇌ Na⁺+OH⁻', rLbl:'NaOH(s)', pLbl:'Na⁺ + OH⁻', isExo:true, gasEffect:false, pFavRight:true,
+    dH:-44.51, EaF:55, EaR:100, iR:4.0, iP:6.0, K:1.5,
+    desc:'Table I · ΔH = −44.51 kJ · dissolving in water · exothermic' },
+  nh4cl:{ name:'NH₄Cl(s) ⇌ NH₄⁺+Cl⁻', rLbl:'NH₄Cl(s)', pLbl:'NH₄⁺ + Cl⁻', isExo:false, gasEffect:false, pFavRight:true,
+    dH:14.78, EaF:50, EaR:45, iR:5.5, iP:4.5, K:0.82,
+    desc:'Table I · ΔH = +14.78 kJ · dissolving in water · endothermic' },
+  nh4no3:{ name:'NH₄NO₃(s) ⇌ NH₄⁺+NO₃⁻', rLbl:'NH₄NO₃(s)', pLbl:'NH₄⁺ + NO₃⁻', isExo:false, gasEffect:false, pFavRight:true,
+    dH:25.69, EaF:55, EaR:45, iR:5.5, iP:4.5, K:0.82,
+    desc:'Table I · ΔH = +25.69 kJ · dissolving in water · endothermic' },
+  nacl:{ name:'NaCl(s) ⇌ Na⁺+Cl⁻', rLbl:'NaCl(s)', pLbl:'Na⁺ + Cl⁻', isExo:false, gasEffect:false, pFavRight:true,
+    dH:3.88, EaF:45, EaR:42, iR:5.0, iP:5.0, K:1.0,
+    desc:'Table I · ΔH = +3.88 kJ · table salt in water · slightly endothermic' },
+  libr:{ name:'LiBr(s) ⇌ Li⁺+Br⁻', rLbl:'LiBr(s)', pLbl:'Li⁺ + Br⁻', isExo:true, gasEffect:false, pFavRight:true,
+    dH:-48.83, EaF:52, EaR:101, iR:4.0, iP:6.0, K:1.5,
+    desc:'Table I · ΔH = −48.83 kJ · dissolving in water · exothermic' },
+  neut:{ name:'H⁺+OH⁻ ⇌ H₂O', rLbl:'H⁺ + OH⁻', pLbl:'H₂O(ℓ)', isExo:true, gasEffect:false, pFavRight:true,
+    dH:-55.8, EaF:40, EaR:96, iR:5.0, iP:5.0, K:1.0,
+    desc:'Table I · ΔH = −55.8 kJ · neutralization · strongly exothermic' }
+};
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let S = {
+  sc:'simple', mode:'learn',
+  rC:5.0, pC:5.0, K:1.0,
+  _rEq:5.0, _pEq:5.0,
+  tempLevel:0, pressLevel:0, catActive:false,
+  isShifting:false, lastStress:null,
+  hist:{ r:[], p:[], t:[] }, markers:[], stressT:0,
+  preds:{ shift:null, k:null }, revealed:true, pending:null,
+  hintsLeft:3, hintUsed:false,
+  score:{ c:0, w:0, streak:0 }
+};
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+function init() {
+  loadScenario('simple');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      drawChart();
+      drawPE();
+      drawBalance(0);
+      startParticles();
+      updateUI();
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// SCENARIO LOAD
+// ═══════════════════════════════════════════════════
+function loadScenario(key) {
+  const s = SC[key];
+  S.sc = key; S.rC = s.iR; S.pC = s.iP; S.K = s.K;
+  S.tempLevel = 0; S.pressLevel = 0; S.catActive = false;
+  S._rEq = s.iR; S._pEq = s.iP; // equilibrium reference concentrations
+  S.hist = { r:[], p:[], t:[] }; S.markers = []; S.stressT = 0;
+  rateHist = { fwd:[], rev:[] };
+  // At equilibrium, rates are equal — both set to 1.0 (normalized baseline)
+  // Rate = k * [concentration], normalized so eq rate = 1.0
+  const eqRate = 1.0;
+  for (let i=0;i<20;i++) {
+    S.hist.r.push(S.rC); S.hist.p.push(S.pC); S.hist.t.push(i);
+    rateHist.fwd.push(eqRate); rateHist.rev.push(eqRate);
+  }
+  S.stressT = 20;
+  document.getElementById('rLbl').textContent  = s.rLbl;
+  document.getElementById('pLbl').textContent  = s.pLbl;
+  document.getElementById('scDesc').textContent = s.desc;
+  document.getElementById('rBarLbl').textContent = s.rLbl.length > 8 ? 'Reactants' : s.rLbl;
+  document.getElementById('pBarLbl').textContent = s.pLbl.length > 8 ? 'Products'  : s.pLbl;
+  const tb = document.getElementById('thermoBadge');
+  tb.textContent = s.isExo ? 'Exothermic ΔH < 0' : 'Endothermic ΔH > 0';
+  tb.className = 'badge ' + (s.isExo ? 'exo' : 'endo');
+  document.getElementById('pNote').textContent = s.gasEffect
+    ? '⚠️ Pressure affects this reaction!'
+    : 'Equal moles — no pressure effect';
+}
+
+// ═══════════════════════════════════════════════════
+// STRESS ENGINE
+// ═══════════════════════════════════════════════════
+function applyStress(type) {
+  if (S.mode === 'regents' && !S.revealed) {
+    setStatus('⚠️ Make your prediction first, then click Reveal!','warn'); return;
+  }
+  if (S.mode === 'regents') {
+    S.revealed = false; S.preds = {shift:null,k:null}; S.pending = type;
+    S.hintUsed = false;
+    showRegPanel(true);
+    setStatus('🤔 Predict what will happen, then click Reveal Answer!','neutral'); return;
+  }
+  execStress(type);
+}
+
+function execStress(type) {
+  const s = SC[S.sc];
+  let shift = 'none', kChange = false, newK = S.K;
+  const D = 1.5;
+  switch(type) {
+    case 'add-reactant': S.rC = Math.min(10, S.rC+D); shift='right'; break;
+    case 'rem-reactant': S.rC = Math.max(.5, S.rC-D); shift='left';  break;
+    case 'add-product':  S.pC = Math.min(10, S.pC+D); shift='left';  break;
+    case 'rem-product':  S.pC = Math.max(.5, S.pC-D); shift='right'; break;
+    case 'temp-up':
+      S.tempLevel = Math.min(2, S.tempLevel+1);
+      shift = s.isExo ? 'left' : 'right';
+      newK  = s.isExo ? Math.max(.05, S.K*.52) : Math.min(20, S.K*1.85);
+      kChange = true; break;
+    case 'temp-down':
+      S.tempLevel = Math.max(-2, S.tempLevel-1);
+      shift = s.isExo ? 'right' : 'left';
+      newK  = s.isExo ? Math.min(20, S.K*1.85) : Math.max(.05, S.K*.52);
+      kChange = true; break;
+    case 'press-up':
+      S.pressLevel = Math.min(3, (S.pressLevel||0)+1);
+      shift = s.gasEffect ? (s.pFavRight ? 'right' : 'left') : 'none'; break;
+    case 'press-down':
+      S.pressLevel = Math.max(-3, (S.pressLevel||0)-1);
+      shift = s.gasEffect ? (s.pFavRight ? 'left' : 'right') : 'none'; break;
+    case 'catalyst': shift='none'; S.catActive=true; boostParticles(); break;
+    case 'inert': shift='none'; break;
+  }
+  S.K = newK; S.lastStress = type;
+  showMicro(type);
+  animShift(shift, type, kChange);
+  updateExplain(type, shift, kChange);
+  drawPE();
+}
+
+function animShift(shift, type, kChange) {
+  S.isShifting = true;
+  const dot = document.getElementById('eqDot');
+  const lbl = document.getElementById('eqLbl');
+  dot.classList.add('shifting'); lbl.textContent = 'Shifting…';
+
+  const ind = document.getElementById('shiftInd');
+  ind.className = 'shift-ind';
+  if (shift==='right')      { ind.textContent='▶▶'; ind.classList.add('sir','show'); }
+  else if (shift==='left')  { ind.textContent='◀◀'; ind.classList.add('sil','show'); }
+  else                      { ind.textContent='⇌';  ind.classList.add('sin','show'); }
+  setTimeout(()=>{ if(ind.classList.contains('show')) ind.classList.add('pulsing'); }, 560);
+
+  const cont = document.getElementById('rxnCont');
+  cont.classList.add('pulse');
+  setTimeout(()=>cont.classList.remove('pulse'), 700);
+
+  // Trigger balance scale animation
+  triggerBalance(shift, type);
+
+  // Record stress point — rates diverge immediately
+  const idx = S.hist.t.length;
+  S.markers.push({ idx, lbl:stressLabel(type), shift, type });
+  S.hist.r.push(S.rC); S.hist.p.push(S.pC); S.hist.t.push(S.stressT++);
+
+  // ── Correct rate model for each stress type ──
+  const prevFwd = rateHist.fwd.length>0 ? rateHist.fwd[rateHist.fwd.length-1] : 1.0;
+  const prevRev = rateHist.rev.length>0 ? rateHist.rev[rateHist.rev.length-1] : 1.0;
+  const rEq = S._rEq || SC[S.sc].iR;
+  const pEq = S._pEq || SC[S.sc].iP;
+  let instFwd, instRev;
+
+  if(type === 'catalyst'){
+    // Catalyst: BOTH rates spike equally — no shift, just faster
+    instFwd = prevFwd * 1.85;
+    instRev = prevRev * 1.85;
+  } else if(type === 'inert'){
+    // Inert gas: no change at all
+    instFwd = prevFwd;
+    instRev = prevRev;
+  } else if(type === 'temp-up' || type === 'temp-down'){
+    // Temperature: changes K, so forward rate is affected more than reverse (or vice versa)
+    // Arrhenius: higher T boosts both rates, but endothermic direction more
+    const s = SC[S.sc];
+    const boost = type === 'temp-up' ? 1.45 : 0.72;
+    if(s.isExo){
+      // Exo: temp up → forward rate increases less, reverse more
+      instFwd = prevFwd * (type==='temp-up' ? 1.28 : 0.80);
+      instRev = prevRev * boost;
+    } else {
+      // Endo: temp up → forward rate increases more
+      instFwd = prevFwd * boost;
+      instRev = prevRev * (type==='temp-up' ? 1.28 : 0.80);
+    }
+  } else {
+    // Concentration/pressure: whichever side was disturbed jumps immediately
+    instFwd = (S.rC / rEq) * prevFwd;
+    instRev = (S.pC / pEq) * prevRev;
+    // Ensure minimum visible divergence for clarity
+    const diff = Math.abs(instFwd - instRev);
+    if(diff > 0 && diff < 0.12 && shift !== 'none'){
+      const avg = (instFwd + instRev) / 2;
+      instFwd = shift==='right' ? avg + 0.28 : avg - 0.28;  // minimum visible divergence
+      instRev = shift==='right' ? avg - 0.28 : avg + 0.28;
+    }
+  }
+
+  // Slightly soften the spike: interpolate 80% toward target from previous
+  // (keeps clear divergence but removes sharp jaggedness)
+  // 0.95 = near-full spike so students see a pronounced jump at the disturbance
+  const softenFwd = prevFwd + (instFwd - prevFwd) * 0.95;
+  const softenRev = prevRev + (instRev - prevRev) * 0.95;
+  rateHist.fwd.push(softenFwd);
+  rateHist.rev.push(softenRev);
+
+  updateTempBadge();
+  updateStats();  // Flash stats immediately when stress is applied
+
+  const AMT=1.2, STEPS=16;
+  let step=0;
+  const iv = setInterval(()=>{
+    step++;
+    if (shift==='right') {
+      S.rC = Math.max(.2, S.rC - AMT/STEPS);
+      S.pC = Math.min(10,  S.pC + AMT/STEPS);
+    } else if (shift==='left') {
+      S.rC = Math.min(10,  S.rC + AMT/STEPS);
+      S.pC = Math.max(.2, S.pC - AMT/STEPS);
+    }
+    S.hist.r.push(S.rC); S.hist.p.push(S.pC); S.hist.t.push(S.stressT++);
+    // During shift: rates converge toward new equilibrium
+    // Target rate at new equilibrium: 1.0 (rates are always equal at eq)
+    const lastFwd = rateHist.fwd[rateHist.fwd.length-1];
+    const lastRev = rateHist.rev[rateHist.rev.length-1];
+    const converge = 0.18; // how fast they pull toward 1.0
+    const newFwd = lastFwd + (1.0 - lastFwd) * converge;
+    const newRev = lastRev + (1.0 - lastRev) * converge;
+    rateHist.fwd.push(newFwd);
+    rateHist.rev.push(newRev);
+    updateBars(); drawChart();
+
+    if (step >= STEPS) {
+      clearInterval(iv);
+      S.isShifting = false;
+      dot.classList.remove('shifting'); lbl.textContent = 'Equilibrium';
+      setTimeout(()=>{ ind.classList.remove('show','pulsing'); }, 1500);
+      syncParticles();
+      // Rates fully converged to new equilibrium — store new eq concentrations
+      S._rEq = S.rC; S._pEq = S.pC;
+      for (let i=0;i<8;i++) {
+        S.hist.r.push(S.rC); S.hist.p.push(S.pC); S.hist.t.push(S.stressT++);
+        // Final plateau: both rates equal at 1.0
+        rateHist.fwd.push(1.0); rateHist.rev.push(1.0);
+      }
+      drawChart(); updateKDisplay();
+    }
+  }, 75);
+}
+
+// ═══════════════════════════════════════════════════
+// CHART — pure canvas, no library
+// ── Modal expand state — declared here so drawChart/drawPE can reference them ──
+let graphLargeMode  = false; // true when rendering into the expanded modal
+let _lgChartCanvas  = null;  // target canvas for LG chart render
+let _lgPECanvas     = null;  // target canvas for LG PE render
+let modalGraphType  = null;  // 'conc' | 'pe'
+
+// ═══════════════════════════════════════════════════
+function drawChart() {
+  // In LG mode use the pre-sized target canvas; in normal mode use 'cc' sized from its pane
+  const canvas = (graphLargeMode && _lgChartCanvas) ? _lgChartCanvas : document.getElementById('cc');
+  if (!canvas) return;
+
+  if (!graphLargeMode) {
+    const pane = canvas.parentElement;
+    const W = pane.clientWidth  || 300;
+    const H = pane.clientHeight || 240;
+    canvas.width  = Math.max(W, 200);
+    canvas.height = Math.max(H, 160);
+  }
+  const ctx = canvas.getContext('2d');
+
+  const LG = graphLargeMode;
+  const isDark = nightMode;
+  const FONT = getComputedStyle(document.body).fontFamily;
+
+  // ── Padding: LG mode reserves space for title (row1) + legend (row2) ──
+  // LEGEND_BAR kept small: title ~22px + gap 6px + legend ~18px + gap 10px = 56px
+  const LEGEND_BAR = LG ? 56 : 0;
+  const PAD = LG
+    ? { t: 8 + LEGEND_BAR, r: showRates ? 72 : 28, b: showRates ? 50 : 38, l: 72 }
+    : { t: 22,              r: 16, b: showRates ? 48 : 36, l: 46 };
+  const PLOT_TOP_MARGIN = LG ? 6 : 0;
+  const cW = canvas.width  - PAD.l - PAD.r;
+  const cH = Math.max(canvas.height - PAD.t - PAD.b, 60); // safety: never ≤ 0
+
+  // ── Colors ──
+  const bgColor    = isDark ? (LG ? '#0E0810' : '#1A1018') : '#fff';
+  const gridColor  = isDark ? (LG ? 'rgba(100,50,80,.4)' : 'rgba(80,40,60,.5)')
+                            : (LG ? 'rgba(200,150,140,.4)' : 'rgba(240,206,201,.45)');
+  const axisColor  = isDark ? (LG ? '#7A4860' : '#4A2840') : (LG ? '#B08080' : '#DDBBBB');
+  const labelColor = isDark ? (LG ? '#C09080' : '#8A6860') : (LG ? '#704040' : '#A87570');
+  const textColor  = isDark ? (LG ? '#F8E0DC' : '#D4A8A0') : (LG ? '#180808' : '#2E1A18');
+  const rColor     = isDark ? (LG ? '#38C8E8' : '#5BB8D4') : (LG ? '#0868A8' : '#5BB8D4');
+  const pColor     = isDark ? (LG ? '#68E038' : '#6BBE45') : (LG ? '#158010' : '#6BBE45');
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const data  = S.hist;
+  const n     = data.t.length;
+  if (n < 2) return;
+
+  // ── Y-axis range: dynamic in LG, fixed in normal view ──
+  let minY, maxY;
+  if (LG) {
+    const PAD_Y = 0.4; // units of padding above/below data
+    // Gather all visible values: reactants + products
+    let lo = Infinity, hi = -Infinity;
+    for (let i = 0; i < n; i++) {
+      if (data.r[i] < lo) lo = data.r[i];
+      if (data.r[i] > hi) hi = data.r[i];
+      if (data.p[i] < lo) lo = data.p[i];
+      if (data.p[i] > hi) hi = data.p[i];
+    }
+    // Include rate curves if visible (rates are normalised 0–~2; scale to chart units)
+    if (showRates && rateHist.fwd.length > 0) {
+      const RATE_MID   = 0.45;
+      const RATE_SCALE_FRAC = 0.32; // same fraction used in toRY
+      // Rates map to concentration-scale via: v mapped to cH*(1-RATE_MID)-(v-1)*cH*RATE_SCALE_FRAC
+      // Inverted: conc_equiv = 1.0 + (RATE_MID - frac_height) / RATE_SCALE_FRAC
+      // Simpler: just note the extremes are ~1 ± max_deviation; convert to conc space
+      // We'll include rate values scaled so their visual extent is within the data range
+      const allRates = [...rateHist.fwd, ...rateHist.rev];
+      const rateMin = Math.min(...allRates);
+      const rateMax = Math.max(...allRates);
+      // Rate y in pixels: toRY(v) = PAD.t + cH*(1-RATE_MID) - (v-1)*cH*RATE_SCALE_FRAC
+      // Equivalent concentration value: solve toY(c) = toRY(v)
+      //   PAD.t + cH - (c - minY)*yScale = PAD.t + cH*(1-RATE_MID) - (v-1)*cH*RATE_SCALE_FRAC
+      //   cH - (c-minY)*yScale = cH*(1-RATE_MID) - (v-1)*cH*RATE_SCALE_FRAC
+      // This is circular (yScale depends on minY/maxY). Use a proxy: map rate values
+      // into a rough concentration equivalent using the pre-computed lo/hi range.
+      const dataRange = Math.max(hi - lo, 1.0);
+      const rateCenter = lo + (hi - lo) * (1 - RATE_MID);
+      const rateEquivMin = rateCenter - (rateMax - 1.0) * dataRange * RATE_SCALE_FRAC;
+      const rateEquivMax = rateCenter + (1.0 - rateMin) * dataRange * RATE_SCALE_FRAC;
+      if (rateEquivMin < lo) lo = rateEquivMin;
+      if (rateEquivMax > hi) hi = rateEquivMax;
+    }
+    // Snap to sensible bounds
+    minY = Math.max(0, lo - PAD_Y);
+    maxY = hi + PAD_Y;
+    // Ensure a minimum span so the graph never looks degenerate
+    if (maxY - minY < 1.5) { const mid = (maxY + minY) / 2; minY = mid - 0.75; maxY = mid + 0.75; }
+  } else {
+    minY = 0;
+    maxY = 11;
+  }
+
+  const xScale = cW / (n - 1);
+  const yScale = cH / (maxY - minY);
+  const toX    = i => PAD.l + i * xScale;
+  const toY    = v => PAD.t + cH - (v - minY) * yScale;
+
+  // ════════════════════════════════════════════════
+  // LG ONLY: Title row + legend row (separate lines, no overlap)
+  // ════════════════════════════════════════════════
+  if (LG) {
+    // ── Row 1: Title ──
+    ctx.font = `800 18px ${FONT}`;
+    ctx.fillStyle = isDark ? '#FFE8E4' : '#120606';
+    ctx.textAlign = 'left';
+    ctx.fillText('Concentration vs Time  (Dynamic Equilibrium)', PAD.l, 20);
+
+    // ── Row 2: Legend (below title, wraps if needed) ──
+    const legendItems = [
+      { label: 'Reactants', color: rColor, dash: null, lw: 3 },
+      { label: 'Products',  color: pColor, dash: null, lw: 3 },
+    ];
+    if (showRates) {
+      const fc = isDark ? 'rgba(255,170,40,1)' : 'rgba(200,60,0,1)';
+      const rc = isDark ? 'rgba(200,130,255,1)' : 'rgba(90,20,180,1)';
+      legendItems.push({ label: 'Forward rate (forming products)',  color: fc, dash: [8,4], lw: 3.5 });
+      legendItems.push({ label: 'Reverse rate (forming reactants)', color: rc, dash: [3,5], lw: 3.5 });
+    }
+
+    const swW = 24, gap = 7, itemGap = 20;
+    const lgFont = `600 13px ${FONT}`;
+    ctx.font = lgFont;
+
+    // Measure items and lay them out in one or two rows
+    const itemWidths = legendItems.map(it => swW + gap + ctx.measureText(it.label).width + itemGap);
+    const totalLegW  = itemWidths.reduce((a, b) => a + b, 0) - itemGap;
+    const availW     = canvas.width - PAD.l - PAD.r;
+
+    // Start legend at left aligned with plot area, row starts at y=50
+    let lgX = PAD.l, lgY = 38;
+    legendItems.forEach((it, ii) => {
+      const itemW = itemWidths[ii];
+      // Wrap to next row if needed
+      if (ii > 0 && lgX + itemW > PAD.l + availW + 10) {
+        lgX = PAD.l;
+        lgY += 20;
+      }
+      const ly = lgY;
+      ctx.save();
+      if (it.dash) {
+        ctx.setLineDash(it.dash);
+        ctx.strokeStyle = it.color; ctx.lineWidth = it.lw;
+        ctx.beginPath(); ctx.moveTo(lgX, ly); ctx.lineTo(lgX + swW, ly); ctx.stroke();
+        ctx.setLineDash([]);
+      } else {
+        ctx.strokeStyle = it.color; ctx.lineWidth = it.lw;
+        ctx.beginPath(); ctx.moveTo(lgX, ly); ctx.lineTo(lgX + swW, ly); ctx.stroke();
+        ctx.beginPath(); ctx.arc(lgX + swW/2, ly, 4, 0, Math.PI*2);
+        ctx.fillStyle = it.color; ctx.fill();
+      }
+      ctx.restore();
+      ctx.fillStyle = textColor; ctx.textAlign = 'left';
+      ctx.font = lgFont;
+      ctx.fillText(it.label, lgX + swW + gap, ly + 4.5);
+      lgX += itemW;
+    });
+  }
+
+  // ── Grid lines ──
+  ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+  // In LG: compute nice tick step from dynamic range; in normal: fixed 0,2,4…10
+  const tickStep = LG ? (()=>{
+    const span = maxY - minY;
+    const raw  = span / 5;          // aim for ~5 grid lines
+    const mag  = Math.pow(10, Math.floor(Math.log10(raw)));
+    const nice = [1,2,2.5,5,10].find(f => f*mag >= raw) * mag;
+    return nice;
+  })() : 2;
+  const tickStart = LG ? Math.ceil(minY  / tickStep) * tickStep : 0;
+  const tickEnd   = LG ? Math.floor(maxY / tickStep) * tickStep : 10;
+
+  for (let y = tickStart; y <= tickEnd + tickStep * 0.01; y = Math.round((y + tickStep) * 1e6) / 1e6) {
+    const py = toY(y);
+    if (py < PAD.t - 2 || py > PAD.t + cH + 2) continue;
+    ctx.beginPath(); ctx.moveTo(PAD.l, py); ctx.lineTo(PAD.l + cW, py); ctx.stroke();
+    ctx.fillStyle = labelColor;
+    ctx.font = `700 ${LG ? 15 : 10}px ${FONT}`;
+    ctx.textAlign = 'right';
+    // In LG show 1 decimal if tick step < 1
+    const tickLabel = LG && tickStep < 1 ? y.toFixed(1) : Math.round(y);
+    ctx.fillText(tickLabel, PAD.l - 6, py + 4);
+  }
+
+  // ── Stress marker lines ──
+  S.markers.forEach((m, mi) => {
+    const px = toX(m.idx);
+    if (px < PAD.l || px > PAD.l + cW) return;
+    ctx.save();
+
+    if (LG) {
+      // Compute pill dimensions first (needed for lineTop)
+      const STRESS_NAMES = {
+        'add-reactant': 'Reactant Added',   'rem-reactant': 'Reactant Removed',
+        'add-product':  'Product Added',    'rem-product':  'Product Removed',
+        'temp-up':      'Temperature ↑',    'temp-down':    'Temperature ↓',
+        'press-up':     'Pressure ↑',       'press-down':   'Pressure ↓',
+        'catalyst':     'Catalyst Added',   'inert':        'Inert Gas Added'
+      };
+      const SHIFT_LABELS = { right: '→ Shift Right', left: '← Shift Left', none: '↔ No Shift' };
+      const stressName  = (m.type && STRESS_NAMES[m.type]) ? STRESS_NAMES[m.type] : m.lbl || 'Stress Applied';
+      const shiftLabel  = m.shift ? SHIFT_LABELS[m.shift] || '' : '';
+      ctx.font = `800 14px ${FONT}`;
+      const pillW = ctx.measureText(stressName).width + 20;
+      const pillH = shiftLabel ? 40 : 26;
+
+      // Expanded: bold stress line starting below the pill
+      ctx.strokeStyle = isDark ? 'rgba(255,100,80,.75)' : 'rgba(170,35,25,.65)';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([6, 4]);
+      const lineTop = PAD.t + PLOT_TOP_MARGIN + pillH + 4;
+      ctx.beginPath(); ctx.moveTo(px, lineTop); ctx.lineTo(px, PAD.t + cH); ctx.stroke();
+      ctx.setLineDash([]);
+      const pillX = Math.min(Math.max(px - pillW/2, PAD.l), PAD.l + cW - pillW);
+      // In LG: place pill inside plot area at top (never above PAD.t)
+      const pillY = LG ? PAD.t + PLOT_TOP_MARGIN : PAD.t - pillH - 6;
+
+      // Pill background
+      ctx.fillStyle = isDark ? 'rgba(190,50,35,.92)' : 'rgba(165,35,22,.9)';
+      roundRect(ctx, pillX, pillY, pillW, pillH, 6); ctx.fill();
+      // Pill top accent line
+      ctx.fillStyle = isDark ? 'rgba(255,140,120,.55)' : 'rgba(255,200,190,.4)';
+      roundRect(ctx, pillX, pillY, pillW, 3, 3); ctx.fill();
+
+      // Main label
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+      ctx.font = `800 14px ${FONT}`;
+      ctx.fillText(stressName, pillX + pillW/2, pillY + (shiftLabel ? 17 : 18));
+
+      // Sublabel (shift direction)
+      if (shiftLabel) {
+        ctx.font = `600 11px ${FONT}`;
+        ctx.fillStyle = 'rgba(255,255,255,.75)';
+        ctx.fillText(shiftLabel, pillX + pillW/2, pillY + 32);
+      }
+    } else {
+      // Normal: dashed + small pill label
+      ctx.setLineDash([5, 4]);
+      ctx.strokeStyle = isDark ? 'rgba(232,131,122,.6)' : 'rgba(194,93,85,.5)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(px, PAD.t); ctx.lineTo(px, PAD.t + cH); ctx.stroke();
+      ctx.setLineDash([]);
+      const lbl = m.lbl;
+      ctx.font = `700 9px ${FONT}`;
+      const tw = ctx.measureText(lbl).width;
+      const pw = tw + 8, ph = 13;
+      const px2 = Math.min(px - pw/2, PAD.l + cW - pw);
+      const py2 = PAD.t + 2 + (mi % 2) * 15;
+      ctx.fillStyle = isDark ? 'rgba(232,131,122,.85)' : 'rgba(194,93,85,.82)';
+      roundRect(ctx, px2, py2, pw, ph, 3); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+      ctx.fillText(lbl, px2 + pw/2, py2 + ph - 3);
+    }
+    ctx.restore();
+  });
+
+  // ── Vertical zone bands (LG only) ──
+  if (LG && S.markers.length > 0) {
+    const stressIdx = S.markers[S.markers.length - 1].idx;
+    // Find where the post-stress shift ends (rates re-converged)
+    let settleIdx = n - 1;
+    if (rateHist.fwd.length > stressIdx + 2) {
+      for (let ci = stressIdx + 3; ci < rateHist.fwd.length - 1; ci++) {
+        if (Math.abs(rateHist.fwd[ci] - rateHist.rev[ci]) < 0.08) { settleIdx = ci; break; }
+      }
+    }
+    const xStress  = toX(stressIdx);
+    const xSettle  = toX(Math.min(settleIdx, n - 1));
+    const zoneAlpha = isDark ? 0.10 : 0.08;
+
+    // Zone 1: Initial equilibrium (left of stress)
+    ctx.fillStyle = isDark ? `rgba(56,200,232,${zoneAlpha})` : `rgba(91,184,212,${zoneAlpha})`;
+    ctx.fillRect(PAD.l, PAD.t, xStress - PAD.l, cH);
+
+    // Zone 2: Change / disturbance
+    ctx.fillStyle = isDark ? `rgba(255,140,80,${zoneAlpha + 0.04})` : `rgba(230,100,30,${zoneAlpha + 0.03})`;
+    ctx.fillRect(xStress, PAD.t, Math.max(xSettle - xStress, 2), cH);
+
+    // Zone 3: Final equilibrium (right of settle)
+    ctx.fillStyle = isDark ? `rgba(104,224,56,${zoneAlpha})` : `rgba(107,190,69,${zoneAlpha})`;
+    ctx.fillRect(xSettle, PAD.t, PAD.l + cW - xSettle, cH);
+
+    // Zone top labels
+    ctx.font = `700 12px ${FONT}`;
+    ctx.fillStyle = isDark ? 'rgba(200,180,180,.55)' : 'rgba(80,50,50,.45)';
+    ctx.textAlign = 'center';
+    const zoneY = PAD.t + 14;
+    if (xStress - PAD.l > 60)
+      ctx.fillText('Initial equilibrium', PAD.l + (xStress - PAD.l)/2, zoneY);
+    if (xSettle - xStress > 30)
+      ctx.fillText('Change', xStress + (xSettle - xStress)/2, zoneY);
+    if (PAD.l + cW - xSettle > 60)
+      ctx.fillText('Final equilibrium', xSettle + (PAD.l + cW - xSettle)/2, zoneY);
+  } else if (LG) {
+    // No stress yet — single "Equilibrium" zone
+    ctx.fillStyle = isDark ? 'rgba(56,200,232,.07)' : 'rgba(91,184,212,.06)';
+    ctx.fillRect(PAD.l, PAD.t, cW, cH);
+    ctx.font = `700 12px ${FONT}`;
+    ctx.fillStyle = isDark ? 'rgba(200,180,180,.45)' : 'rgba(80,50,50,.38)';
+    ctx.textAlign = 'center';
+    ctx.fillText('Dynamic equilibrium', PAD.l + cW/2, PAD.t + 14);
+  }
+
+  // ── Helper: smooth bezier curve through data points (normal mode only) ──
+  function smoothCurve(ctx, xs, ys) {
+    if (xs.length < 2) return;
+    ctx.moveTo(xs[0], ys[0]);
+    for (let i = 0; i < xs.length - 1; i++) {
+      const cpx = (xs[i] + xs[i+1]) / 2;
+      ctx.bezierCurveTo(cpx, ys[i], cpx, ys[i+1], xs[i+1], ys[i+1]);
+    }
+  }
+
+  if (LG && n >= 4) {
+    // ════════════════════════════════════════════════════════════
+    // EXPANDED MODE — Regents-style piecewise history
+    // Each segment drawn independently — NEVER connected across a jump
+    // ════════════════════════════════════════════════════════════
+
+    const SYN_PTS = 60;
+    const M       = S.markers;
+    const bounds  = [0, ...M.map(m => m.idx), n];
+
+    const rFillCol = isDark?'rgba(56,200,232,.13)':'rgba(56,150,200,.10)';
+    const pFillCol = isDark?'rgba(104,224,56,.12)':'rgba(60,160,60,.09)';
+
+    function drawSegFill(xs, ys, color) {
+      if (xs.length < 2) return;
+      ctx.save(); ctx.beginPath();
+      ctx.moveTo(xs[0], ys[0]);
+      for (let i = 1; i < xs.length; i++) ctx.lineTo(xs[i], ys[i]);
+      ctx.lineTo(xs[xs.length-1], toY(minY));
+      ctx.lineTo(xs[0], toY(minY));
+      ctx.closePath(); ctx.fillStyle = color; ctx.fill(); ctx.restore();
+    }
+    function drawSegLine(xs, ys, color, lw) {
+      if (xs.length < 2) return;
+      ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = lw;
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.moveTo(xs[0], ys[0]);
+      for (let i = 1; i < xs.length; i++) ctx.lineTo(xs[i], ys[i]);
+      ctx.stroke();
+    }
+
+    const jumps = [];
+
+    for (let k = 0; k < bounds.length - 1; k++) {
+      const segStart = bounds[k];
+      const segEnd   = Math.min(bounds[k + 1], n);
+      if (segStart >= n) break;
+
+      const stress = k < M.length ? M[k] : null;
+      const rJ     = stress && (stress.type==='add-reactant'||stress.type==='rem-reactant');
+      const pJ     = stress && (stress.type==='add-product'  ||stress.type==='rem-product');
+
+      const rSt  = data.r[segStart];
+      const pSt  = data.p[segStart];
+      const rEnd = data.r[Math.min(segEnd - 1, n - 1)];
+      const pEnd = data.p[Math.min(segEnd - 1, n - 1)];
+
+      // xEnd: extend to jump x-position so segment abuts it cleanly
+      const xStart = toX(segStart);
+      const xEnd   = stress ? toX(bounds[k + 1]) : toX(n - 1);
+      const span   = Math.max(xEnd - xStart, 1);
+
+      const rxs = [], rys = [], pxs = [], pys = [];
+
+      if (k === 0) {
+        // Flat initial plateau
+        rxs.push(xStart); rys.push(toY(rSt));
+        rxs.push(xEnd);   rys.push(toY(rSt));
+        pxs.push(xStart); pys.push(toY(pSt));
+        pxs.push(xEnd);   pys.push(toY(pSt));
+      } else {
+        // Exponential decay — start from jumped value, approach plateau
+        for (let t = 0; t <= SYN_PTS; t++) {
+          const frac = 1 - Math.exp(-5.5 * t / SYN_PTS);
+          const px   = xStart + span * (t / SYN_PTS);
+          rxs.push(px); rys.push(toY(rSt + (rEnd - rSt) * frac));
+          pxs.push(px); pys.push(toY(pSt + (pEnd - pSt) * frac));
+        }
+      }
+
+      drawSegFill(rxs, rys, rFillCol);
+      drawSegFill(pxs, pys, pFillCol);
+      drawSegLine(rxs, rys, rColor, 5);
+      drawSegLine(pxs, pys, pColor, 5);
+
+      // Collect jump that starts at the END of this segment
+      if (stress && bounds[k + 1] < n) {
+        const rAfter = data.r[bounds[k + 1]];
+        const pAfter = data.p[bounds[k + 1]];
+        jumps.push({
+          x: xEnd,
+          rFrom: rEnd, rTo: rAfter, rJ,
+          pFrom: pEnd, pTo: pAfter, pJ
+        });
+      }
+    }
+
+    // Draw vertical jump lines on top
+    jumps.forEach(j => {
+      if (j.rJ && Math.abs(j.rFrom - j.rTo) > 0.04) {
+        ctx.save(); ctx.strokeStyle = rColor; ctx.lineWidth = 5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(j.x, toY(j.rFrom)); ctx.lineTo(j.x, toY(j.rTo));
+        ctx.stroke(); ctx.restore();
+      }
+      if (j.pJ && Math.abs(j.pFrom - j.pTo) > 0.04) {
+        ctx.save(); ctx.strokeStyle = pColor; ctx.lineWidth = 5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(j.x, toY(j.pFrom)); ctx.lineTo(j.x, toY(j.pTo));
+        ctx.stroke(); ctx.restore();
+      }
+    });
+
+    // Species labels at right edge
+    const s2 = SC[S.sc];
+    const rFinal = data.r[n - 1], pFinal = data.p[n - 1];
+    function speciesLabel(label, yVal, color, fillColor) {
+      const yPx = toY(yVal);
+      ctx.font = `800 14px ${FONT}`;
+      const tw = ctx.measureText(label).width;
+      const pw = tw + 14, ph = 22;
+      const lx = PAD.l + cW - pw - 10;
+      const ly = Math.max(PAD.t + 4, Math.min(PAD.t + cH - ph - 2, yPx - ph/2));
+      ctx.fillStyle = fillColor; roundRect(ctx, lx, ly, pw, ph, 5); ctx.fill();
+      ctx.fillStyle = color; ctx.textAlign = 'left';
+      ctx.fillText(label, lx + 7, ly + 15);
+    }
+    let rLY = rFinal, pLY = pFinal;
+    if (Math.abs(toY(rLY) - toY(pLY)) < 28) {
+      const mid = (rLY + pLY) / 2, half = (maxY - minY) * 0.05;
+      rLY = mid + half; pLY = mid - half;
+    }
+    speciesLabel(s2.rLbl, rLY, rColor, isDark?'rgba(56,200,232,.22)':'rgba(8,104,168,.12)');
+    speciesLabel(s2.pLbl, pLY, pColor, isDark?'rgba(104,224,56,.22)':'rgba(21,128,16,.12)');
+
+  } else {
+    // ── NORMAL MODE: unchanged bezier-smooth curves ──
+    const rXs = [], rYs = [], pXs = [], pYs = [];
+    for (let i = 0; i < n; i++) {
+      rXs.push(toX(i)); rYs.push(toY(data.r[i]));
+      pXs.push(toX(i)); pYs.push(toY(data.p[i]));
+    }
+
+    // Reactant fill
+    ctx.save(); ctx.beginPath(); smoothCurve(ctx, rXs, rYs);
+    ctx.lineTo(toX(n-1), toY(minY)); ctx.lineTo(toX(0), toY(minY)); ctx.closePath();
+    ctx.fillStyle = 'rgba(91,184,212,.09)'; ctx.fill(); ctx.restore();
+
+    // Product fill
+    ctx.save(); ctx.beginPath(); smoothCurve(ctx, pXs, pYs);
+    ctx.lineTo(toX(n-1), toY(minY)); ctx.lineTo(toX(0), toY(minY)); ctx.closePath();
+    ctx.fillStyle = 'rgba(107,190,69,.07)'; ctx.fill(); ctx.restore();
+
+    // Reactant line
+    ctx.beginPath(); ctx.strokeStyle = rColor; ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    smoothCurve(ctx, rXs, rYs); ctx.stroke();
+
+    // Product line
+    ctx.beginPath(); ctx.strokeStyle = pColor; ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    smoothCurve(ctx, pXs, pYs); ctx.stroke();
+  }
+
+  // ── Axes ──
+  ctx.strokeStyle = axisColor; ctx.lineWidth = LG ? 2 : 1.5;
+  ctx.beginPath(); ctx.moveTo(PAD.l, PAD.t); ctx.lineTo(PAD.l, PAD.t + cH); ctx.lineTo(PAD.l + cW, PAD.t + cH); ctx.stroke();
+
+  // ── Axis labels ──
+  ctx.fillStyle = labelColor;
+  ctx.font = `800 ${LG ? 18 : 10}px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('Time →', PAD.l + cW/2, canvas.height - (LG ? 14 : 6));
+  ctx.save();
+  ctx.translate(LG ? 20 : 13, PAD.t + cH/2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center';
+  ctx.fillText('Concentration (M)', 0, LG ? 2 : 0);
+  ctx.restore();
+
+  // ── "Immediate Change" annotation (LG: below stress line; normal: near top) ──
+  if (S.markers.length > 0) {
+    const lastM = S.markers[S.markers.length - 1];
+    const mpx = toX(lastM.idx);
+    if (mpx >= PAD.l && mpx <= PAD.l + cW) {
+      const icColor = isDark ? 'rgba(255,110,90,.95)' : 'rgba(170,40,30,.9)';
+
+      if (LG) {
+        // "Immediate Change" — secondary, small, near the rate divergence zone
+        // Positioned just below midchart, close to the stress line
+        ctx.font = `500 10px ${FONT}`;
+        ctx.fillStyle = isDark ? 'rgba(255,130,110,.45)' : 'rgba(160,40,30,.38)';
+        ctx.textAlign = 'left';
+        const icX = mpx + 6;
+        ctx.fillText('Immediate Change', icX, PAD.t + cH * 0.55);
+
+        // "New Equilibrium" — secondary, aligned to plateau region (near bottom of chart)
+        const plateauX = Math.min(mpx + (PAD.l + cW - mpx) * 0.58, PAD.l + cW - 24);
+        if (plateauX - mpx > 40) {
+          ctx.font = `500 10px ${FONT}`;
+          ctx.fillStyle = isDark ? 'rgba(80,210,100,.45)' : 'rgba(20,110,40,.38)';
+          ctx.textAlign = 'center';
+          ctx.fillText('New Equilibrium', plateauX, PAD.t + cH * 0.92);
+        }
+      } else {
+        ctx.font = `700 8.5px ${FONT}`;
+        ctx.fillStyle = icColor;
+        ctx.textAlign = 'center';
+        ctx.fillText('⬇ Immediate', mpx, PAD.t + cH * 0.18);
+        ctx.fillText('Change',      mpx, PAD.t + cH * 0.18 + 11);
+        const plateauX = Math.min(mpx + (PAD.l + cW - mpx) * 0.55, PAD.l + cW - 10);
+        if (plateauX - mpx > 28) {
+          const neColor = isDark ? 'rgba(80,208,96,.9)' : 'rgba(50,140,30,.8)';
+          ctx.fillStyle = neColor;
+          ctx.fillText('⟶ New',      plateauX, PAD.t + cH * 0.18);
+          ctx.fillText('Equilibrium', plateauX, PAD.t + cH * 0.18 + 11);
+        }
+      }
+    }
+  }
+
+  // ── RATES OVERLAY ──
+  if (showRates && rateHist.fwd.length > 1) {
+    const nr = rateHist.fwd.length;
+    const toRX = i => PAD.l + i * xScale;
+
+    // ── Rate axis: independent scale in LG; shared chart space in normal mode ──
+    let toRY;
+    let rateAxisMinV, rateAxisMaxV, rateTickStep;
+    if (LG) {
+      // Compute rate data range with padding
+      const allRates = [...rateHist.fwd, ...rateHist.rev];
+      const rMin = Math.min(...allRates);
+      const rMax = Math.max(...allRates);
+      const rPad = Math.max(0.08, (rMax - rMin) * 0.15);
+      rateAxisMinV = Math.max(0, rMin - rPad);
+      rateAxisMaxV = rMax + rPad;
+      // Ensure minimum visible span (so eq state isn't a degenerate line)
+      if (rateAxisMaxV - rateAxisMinV < 0.3) {
+        const mid = (rateAxisMaxV + rateAxisMinV) / 2;
+        rateAxisMinV = mid - 0.15; rateAxisMaxV = mid + 0.15;
+      }
+      const rSpan = rateAxisMaxV - rateAxisMinV;
+      // Nice tick step
+      const rawStep = rSpan / 4;
+      const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+      rateTickStep = [0.1,0.2,0.25,0.5,1,2,2.5,5].find(f => f*mag >= rawStep) * mag;
+      // Rate maps to same pixel range as conc (full chart height)
+      toRY = v => PAD.t + cH - (v - rateAxisMinV) / (rateAxisMaxV - rateAxisMinV) * cH;
+    } else {
+      // RATE_SCALE increased so rate changes fill more of the chart height
+      const RATE_MID   = 0.45;
+      const RATE_SCALE = cH * 0.80;  // ×2.5 visual emphasis — chemistry unchanged
+      toRY = v => PAD.t + cH * (1 - RATE_MID) - (v - 1.0) * RATE_SCALE;
+    }
+
+    // Rate curve colors — distinct from conc curves, high saturation
+    const fwdColor = isDark ? (LG ? 'rgba(255,168,20,1)' : 'rgba(255,145,20,1)')  : (LG ? 'rgba(210,70,0,1)'  : 'rgba(200,65,0,1)');
+    const revColor = isDark ? (LG ? 'rgba(210,120,255,1)' : 'rgba(190,90,255,1)')   : (LG ? 'rgba(108,20,215,1)' : 'rgba(120,25,220,1)');
+    const fwdLW    = LG ? 3.5 : 3.0;  // thicker than conc curves for emphasis
+    const revLW    = LG ? 3.5 : 3.0;
+
+    // ── RIGHT Y-AXIS (LG only) ──
+    if (LG) {
+      const axR = PAD.l + cW; // right edge of chart
+      const rAxisX = axR + 8; // right axis line x
+
+      // Axis line
+      ctx.save();
+      ctx.strokeStyle = isDark ? 'rgba(255,168,20,.5)' : 'rgba(180,80,10,.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(rAxisX, PAD.t);
+      ctx.lineTo(rAxisX, PAD.t + cH);
+      ctx.stroke();
+
+      // Tick marks + labels
+      const tickStart = Math.ceil(rateAxisMinV / rateTickStep) * rateTickStep;
+      for (let rv = tickStart; rv <= rateAxisMaxV + rateTickStep * 0.01; rv = Math.round((rv + rateTickStep) * 1e6) / 1e6) {
+        const ty = toRY(rv);
+        if (ty < PAD.t - 2 || ty > PAD.t + cH + 2) continue;
+        // Tick
+        ctx.strokeStyle = isDark ? 'rgba(255,168,20,.5)' : 'rgba(180,80,10,.4)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(rAxisX, ty); ctx.lineTo(rAxisX + 5, ty); ctx.stroke();
+        // Light horizontal grid line for rate
+        ctx.setLineDash([2, 8]);
+        ctx.strokeStyle = isDark ? 'rgba(255,168,20,.12)' : 'rgba(180,80,10,.1)';
+        ctx.beginPath(); ctx.moveTo(PAD.l, ty); ctx.lineTo(axR, ty); ctx.stroke();
+        ctx.setLineDash([]);
+        // Label
+        ctx.fillStyle = isDark ? 'rgba(255,168,20,.8)' : 'rgba(160,60,0,.75)';
+        ctx.font = `600 12px ${FONT}`;
+        ctx.textAlign = 'left';
+        const tickLabel = rateTickStep < 0.1 ? rv.toFixed(2) : rateTickStep < 1 ? rv.toFixed(1) : rv.toFixed(1);
+        ctx.fillText(tickLabel, rAxisX + 8, ty + 4);
+      }
+
+      // Right axis title — rotated, right side
+      ctx.save();
+      ctx.translate(PAD.l + cW + 60, PAD.t + cH / 2);
+      ctx.rotate(Math.PI / 2);
+      ctx.font = `800 15px ${FONT}`;
+      ctx.fillStyle = isDark ? 'rgba(255,168,20,.9)' : 'rgba(160,60,0,.85)';
+      ctx.textAlign = 'center';
+      ctx.fillText('Rate (relative)', 0, 0);
+      ctx.restore();
+
+      ctx.restore();
+    }
+
+    ctx.save();
+
+    // ── Divergence marker (LG: clean bracket; small: glow circles) ──
+    if (S.markers.length > 0) {
+      const lastM = S.markers[S.markers.length - 1];
+      if (lastM.idx < nr) {
+        const fwdAt = rateHist.fwd[lastM.idx] || 1.0;
+        const revAt = rateHist.rev[lastM.idx] || 1.0;
+        const div   = Math.abs(fwdAt - revAt);
+        if (div > 0.08) {
+          const dpx = toRX(lastM.idx);
+          const fpy = toRY(fwdAt);
+          const rpy = toRY(revAt);
+          const midY = (fpy + rpy) / 2;
+
+          if (LG) {
+            ctx.save();
+            const gapTop    = Math.min(fpy, rpy) + 3;
+            const gapBot    = Math.max(fpy, rpy) - 3;
+            const markerX   = dpx + 12;
+
+            // Filled diamond at each endpoint for clarity
+            const drawDiamond = (cx, cy) => {
+              const d = 5;
+              ctx.beginPath();
+              ctx.moveTo(cx, cy-d); ctx.lineTo(cx+d, cy);
+              ctx.lineTo(cx, cy+d); ctx.lineTo(cx-d, cy);
+              ctx.closePath(); ctx.fill();
+            };
+            ctx.fillStyle = isDark ? 'rgba(255,220,80,.9)' : 'rgba(130,65,0,.85)';
+            drawDiamond(markerX, gapTop);
+            drawDiamond(markerX, gapBot);
+
+            // Solid vertical line connecting diamonds
+            ctx.strokeStyle = isDark ? 'rgba(255,220,80,.75)' : 'rgba(130,65,0,.7)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(markerX, gapTop + 5);
+            ctx.lineTo(markerX, gapBot - 5);
+            ctx.stroke();
+
+            // "Rates diverge" label — right of marker, at midpoint
+            ctx.font = `700 13px ${FONT}`;
+            ctx.fillStyle = isDark ? 'rgba(255,220,80,.85)' : 'rgba(115,55,0,.8)';
+            ctx.textAlign = 'left';
+            ctx.fillText('Rates diverge', markerX + 8, midY + 5);
+            ctx.restore();
+          } else {
+            ctx.save();
+            ctx.beginPath(); ctx.arc(dpx, fpy, 8, 0, Math.PI*2);
+            ctx.fillStyle = isDark ? 'rgba(255,155,50,.25)' : 'rgba(220,80,10,.2)'; ctx.fill();
+            ctx.beginPath(); ctx.arc(dpx, rpy, 8, 0, Math.PI*2);
+            ctx.fillStyle = isDark ? 'rgba(185,110,255,.25)' : 'rgba(100,40,185,.18)'; ctx.fill();
+            ctx.setLineDash([2,2]);
+            ctx.strokeStyle = isDark ? 'rgba(255,220,100,.6)' : 'rgba(160,100,0,.5)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(dpx, Math.min(fpy,rpy)+2); ctx.lineTo(dpx, Math.max(fpy,rpy)-2); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.font = `bold 8px ${FONT}`;
+            ctx.fillStyle = isDark ? 'rgba(255,230,80,1)' : 'rgba(140,80,0,.85)';
+            ctx.textAlign = dpx < PAD.l+cW-70 ? 'left' : 'right';
+            ctx.fillText('← Rates diverge', dpx + (dpx < PAD.l+cW-70 ? 5 : -5), midY);
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    // ── Forward rate curve ──
+    ctx.beginPath();
+    ctx.strokeStyle = fwdColor; ctx.lineWidth = fwdLW;
+    ctx.setLineDash(LG ? [10, 5] : [6, 4]);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    for (let i = 0; i < nr; i++) {
+      const rx2 = toRX(i), ry2 = toRY(rateHist.fwd[i]);
+      i === 0 ? ctx.moveTo(rx2, ry2) : ctx.lineTo(rx2, ry2);
+    }
+    ctx.stroke();
+
+    // ── Reverse rate curve ──
+    ctx.beginPath();
+    ctx.strokeStyle = revColor; ctx.lineWidth = revLW;
+    ctx.setLineDash(LG ? [4, 5] : [3, 4]);
+    for (let i = 0; i < nr; i++) {
+      const rx2 = toRX(i), ry2 = toRY(rateHist.rev[i]);
+      i === 0 ? ctx.moveTo(rx2, ry2) : ctx.lineTo(rx2, ry2);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ── "Dynamic equilibrium (rates equal)" convergence label ──
+    const lastFwd = rateHist.fwd[nr - 1];
+    const lastRev = rateHist.rev[nr - 1];
+    let convIdx = -1;
+    if (S.markers.length > 0) {
+      const stressIdx = S.markers[S.markers.length - 1].idx;
+      for (let ci = stressIdx + 4; ci < nr - 1; ci++) {
+        if (Math.abs(rateHist.fwd[ci] - rateHist.rev[ci]) < 0.06) { convIdx = ci; break; }
+      }
+    } else if (Math.abs(lastFwd - lastRev) < 0.05) {
+      convIdx = nr - 4;
+    }
+    if (convIdx > 0 && convIdx < nr) {
+      const eqX = toRX(convIdx);
+      const eqY = toRY((rateHist.fwd[convIdx] + rateHist.rev[convIdx]) / 2);
+      ctx.beginPath(); ctx.arc(eqX, eqY, LG?7:3.5, 0, Math.PI * 2);
+      ctx.fillStyle = isDark ? 'rgba(80,240,130,.9)' : 'rgba(20,130,50,.8)'; ctx.fill();
+      ctx.font = `800 ${LG ? 17 : 8}px ${FONT}`;
+      ctx.fillStyle = isDark ? (LG?'rgba(60,235,120,1)':'rgba(100,230,140,.85)') : (LG?'rgba(5,100,35,1)':'rgba(20,120,50,.8)');
+      const side = eqX > PAD.l + cW * 0.6;
+      ctx.textAlign = side ? 'right' : 'left';
+      ctx.fillText('⇌ Dynamic equilibrium (rates equal)', side ? eqX - 12 : eqX + 12, eqY - (LG?12:6));
+    }
+
+    // ── Rate axis label (small only — LG has right axis) ──
+    if (!LG) {
+      const RATE_MID = 0.45;
+      ctx.save();
+      ctx.translate(PAD.l - 30, PAD.t + cH * RATE_MID);
+      ctx.rotate(-Math.PI / 2);
+      ctx.font = `700 8px ${FONT}`;
+      ctx.fillStyle = isDark ? 'rgba(255,155,50,.7)' : 'rgba(180,80,10,.65)';
+      ctx.textAlign = 'center';
+      ctx.fillText('Rate ⟶', 0, 0);
+      ctx.restore();
+    }
+
+    // ── k_eq reference line (LG: use right axis; small: light guide) ──
+    const eqLineY = toRY(1.0);
+    // Only draw if k_eq=1.0 is within the visible rate range
+    if (eqLineY >= PAD.t && eqLineY <= PAD.t + cH) {
+      ctx.save();
+      ctx.setLineDash([2, 6]);
+      ctx.strokeStyle = isDark ? 'rgba(200,200,200,.18)' : 'rgba(150,150,150,.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(PAD.l, eqLineY); ctx.lineTo(PAD.l + cW, eqLineY); ctx.stroke();
+      ctx.setLineDash([]);
+      if (!LG) {
+        ctx.fillStyle = isDark ? 'rgba(200,200,200,.4)' : 'rgba(120,120,120,.5)';
+        ctx.font = `700 7px ${FONT}`;
+        ctx.textAlign = 'left';
+        ctx.fillText('k_eq', PAD.l + 3, eqLineY - 3);
+      }
+      ctx.restore();
+    }
+
+    ctx.restore(); // end rates save
+
+    // ── Rate legend: small mode only (LG uses top legend bar) ──
+    if (!LG) {
+      const rlx = PAD.l + 4, rly = PAD.t + cH + 14;
+      ctx.font = `700 8.5px ${FONT}`;
+      ctx.save(); ctx.strokeStyle = fwdColor; ctx.lineWidth = 2; ctx.setLineDash([5,3]);
+      ctx.beginPath(); ctx.moveTo(rlx, rly); ctx.lineTo(rlx+16, rly); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+      ctx.fillStyle = fwdColor; ctx.textAlign = 'left';
+      ctx.fillText('Forward rate (forming products)', rlx+20, rly+3);
+      ctx.save(); ctx.strokeStyle = revColor; ctx.lineWidth = 3; ctx.setLineDash([3,4]);
+      ctx.beginPath(); ctx.moveTo(rlx+175, rly); ctx.lineTo(rlx+191, rly); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+      ctx.fillStyle = revColor;
+      ctx.fillText('Reverse rate (forming reactants)', rlx+195, rly+3);
+    }
+  }
+
+  // ── Conc legend: small mode inside chart; LG uses top legend bar ──
+  if (!LG) {
+    const lx = PAD.l + cW - 100;
+    const ly = PAD.t + 6;
+    ctx.fillStyle = isDark ? 'rgba(26,14,32,.94)' : 'rgba(255,255,255,.94)';
+    roundRect(ctx, lx-4, ly-2, 104, 34, 4); ctx.fill();
+    ctx.fillStyle = isDark ? '#3AAED0' : '#3AAED0'; ctx.fillRect(lx, ly+4, 14, 3);
+    ctx.fillStyle = textColor; ctx.font = `600 9px ${FONT}`; ctx.textAlign = 'left';
+    ctx.fillText('Reactants', lx+18, ly+9);
+    ctx.fillStyle = isDark ? '#48B028' : '#48B028'; ctx.fillRect(lx, ly+18, 14, 3);
+    ctx.fillStyle = textColor;
+    ctx.fillText('Products', lx+18, ly+23);
+  }
+
+  // Auto-refresh the expanded modal when normal chart redraws (only when not already in LG mode)
+  if (!graphLargeMode && typeof modalGraphType !== 'undefined'
+      && modalGraphType === 'conc'
+      && document.getElementById('graphModal').classList.contains('open')) {
+    const lc = document.getElementById('cc-large');
+    if (lc) drawChartOnCanvas('cc-large');
+  }
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+// ═══════════════════════════════════════════════════
+// BALANCE SCALE — canvas animation
+// ═══════════════════════════════════════════════════
+let balAngle = 0;         // current beam rotation (degrees, + = right tips down)
+let balTarget = 0;        // target angle
+let balAnimId = null;
+const BAL_MAX_ANGLE = 18; // max tip degrees
+
+function drawBalance(angle) {
+  const canvas = document.getElementById('balCanvas');
+  if (!canvas) return;
+  const parent = canvas.parentElement;
+  const W = Math.max(parent.clientWidth - 20, 200);
+  const H = 100;
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  const isDk = nightMode;
+  const cx = W / 2;   // pivot x
+  const py = H - 20;  // pivot y
+  const beamLen = W * 0.38;  // half-beam length
+  const rad = angle * Math.PI / 180;
+
+  // Colors
+  const postCol   = isDk ? '#6A3A80' : '#C8A0B8';
+  const beamCol   = isDk ? '#D060A0' : '#C25D55';
+  const rPanCol   = isDk ? '#1A9AB8' : '#5BB8D4';
+  const pPanCol   = isDk ? '#28A838' : '#6BBE45';
+  const rBraceCol = isDk ? 'rgba(64,200,224,.4)' : 'rgba(91,184,212,.35)';
+  const pBraceCol = isDk ? 'rgba(80,208,96,.4)'  : 'rgba(107,190,69,.3)';
+  const txtCol    = isDk ? '#F8EEF4' : '#2E1A18';
+  const strCol    = isDk ? '#6A3A80' : '#D4A8C0';
+  const fulCol    = isDk ? '#8A3090' : '#C25D55';
+  const glowR     = isDk ? 'rgba(64,200,224,.6)'  : 'rgba(91,184,212,.5)';
+  const glowP     = isDk ? 'rgba(80,208,96,.6)'   : 'rgba(107,190,69,.5)';
+
+  // Post (vertical stand)
+  ctx.beginPath();
+  ctx.moveTo(cx, py - 2);
+  ctx.lineTo(cx, 12);
+  ctx.strokeStyle = postCol;
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Fulcrum triangle
+  ctx.beginPath();
+  ctx.moveTo(cx - 14, py + 8);
+  ctx.lineTo(cx + 14, py + 8);
+  ctx.lineTo(cx, py - 2);
+  ctx.closePath();
+  ctx.fillStyle = fulCol;
+  ctx.fill();
+
+  // Base line
+  ctx.beginPath();
+  ctx.moveTo(cx - 30, py + 9);
+  ctx.lineTo(cx + 30, py + 9);
+  ctx.strokeStyle = fulCol;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Beam endpoints
+  const lx = cx - beamLen * Math.cos(rad);
+  const ly = py - 2 - beamLen * Math.sin(rad) - 20; // pivot is at top of post
+  const rx = cx + beamLen * Math.cos(rad);
+  const ry = py - 2 + beamLen * Math.sin(rad) - 20;
+
+  // Beam glow (when tipping)
+  if (Math.abs(angle) > 2) {
+    ctx.save();
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = angle > 0 ? glowP : glowR;
+    ctx.beginPath();
+    ctx.moveTo(lx, ly);
+    ctx.lineTo(rx, ry);
+    ctx.strokeStyle = beamCol;
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(lx, ly);
+    ctx.lineTo(rx, ry);
+    ctx.strokeStyle = beamCol;
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+
+  // Pivot circle
+  ctx.beginPath();
+  ctx.arc(cx, py - 22, 5, 0, Math.PI * 2);
+  ctx.fillStyle = beamCol;
+  ctx.fill();
+
+  // String length (always hangs vertically from beam end)
+  const strLen = 18;
+
+  // Left pan (Reactants)
+  const lPanY = ly + strLen;
+  const panW = beamLen * 0.55, panH = 10;
+  // String
+  ctx.beginPath();
+  ctx.moveTo(lx, ly + 2);
+  ctx.lineTo(lx, lPanY);
+  ctx.strokeStyle = strCol;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  // Pan glow
+  if (angle < -2) {
+    ctx.save();
+    ctx.shadowBlur = 16;
+    ctx.shadowColor = glowR;
+    roundRect(ctx, lx - panW/2, lPanY, panW, panH, 5);
+    ctx.fillStyle = rPanCol;
+    ctx.fill();
+    ctx.restore();
+  } else {
+    roundRect(ctx, lx - panW/2, lPanY, panW, panH, 5);
+    ctx.fillStyle = rPanCol;
+    ctx.fill();
+  }
+  ctx.fillStyle = '#fff';
+  ctx.font = `700 ${panW > 80 ? 10 : 9}px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('Reactants', lx, lPanY + 7.5);
+
+  // Right pan (Products)
+  const rPanY = ry + strLen;
+  // String
+  ctx.beginPath();
+  ctx.moveTo(rx, ry + 2);
+  ctx.lineTo(rx, rPanY);
+  ctx.strokeStyle = strCol;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  // Pan glow
+  if (angle > 2) {
+    ctx.save();
+    ctx.shadowBlur = 16;
+    ctx.shadowColor = glowP;
+    roundRect(ctx, rx - panW/2, rPanY, panW, panH, 5);
+    ctx.fillStyle = pPanCol;
+    ctx.fill();
+    ctx.restore();
+  } else {
+    roundRect(ctx, rx - panW/2, rPanY, panW, panH, 5);
+    ctx.fillStyle = pPanCol;
+    ctx.fill();
+  }
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.fillText('Products', rx, rPanY + 7.5);
+}
+
+function animBalanceTo(targetAngle, duration = 900) {
+  if (balAnimId) cancelAnimationFrame(balAnimId);
+  const startAngle = balAngle;
+  const startTime = performance.now();
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    // Elastic easing for fun spring effect
+    const ease = t === 1 ? 1 :
+      1 - Math.pow(2, -8 * t) * Math.cos((t * duration - 75) * (2 * Math.PI) / 750);
+    balAngle = startAngle + (targetAngle - startAngle) * ease;
+    drawBalance(balAngle);
+    if (t < 1) {
+      balAnimId = requestAnimationFrame(step);
+    } else {
+      balAngle = targetAngle;
+      drawBalance(balAngle);
+    }
+  }
+  balAnimId = requestAnimationFrame(step);
+}
+
+function triggerBalance(shift, stressType) {
+  const et = document.getElementById('balEqTxt');
+  // Label helpers
+  const DIST_LABELS = {
+    'add-reactant':'Reactant added','rem-reactant':'Reactant removed',
+    'add-product':'Product added',  'rem-product':'Product removed',
+    'temp-up':'Temperature ↑',      'temp-down':'Temperature ↓',
+    'press-up':'Pressure ↑',        'press-down':'Pressure ↓',
+    'catalyst':'Catalyst added',    'inert':'Inert gas added'
+  };
+
+  if (shift === 'right') {
+    // Step 1: brief disturbance flash (no tilt yet)
+    if (et && stressType) {
+      et.className='bal-eq-txt at-eq';
+      et.textContent = '⚡ ' + (DIST_LABELS[stressType] || 'Stress applied');
+    }
+    // Step 2: tilt toward products (right side down = system response)
+    setTimeout(() => {
+      // +angle → right pan goes DOWN → system shifts toward PRODUCTS
+      animBalanceTo(-BAL_MAX_ANGLE, 700);
+      if (et) { et.className='bal-eq-txt tipping-r'; et.textContent='⟶ Shift toward products'; }
+    }, 350);
+    // Step 3: settle to new equilibrium
+    setTimeout(() => {
+      animBalanceTo(0, 1200);
+      if (et) { et.className='bal-eq-txt at-eq'; et.textContent='⚖️ New Equilibrium'; }
+    }, 2500);
+
+  } else if (shift === 'left') {
+    // Step 1: disturbance flash
+    if (et && stressType) {
+      et.className='bal-eq-txt at-eq';
+      et.textContent = '⚡ ' + (DIST_LABELS[stressType] || 'Stress applied');
+    }
+    // Step 2: tilt toward reactants (left side down = system response)
+    setTimeout(() => {
+      // -angle → left pan goes DOWN → system shifts toward REACTANTS
+      animBalanceTo(BAL_MAX_ANGLE, 700);
+      if (et) { et.className='bal-eq-txt tipping-l'; et.textContent='⟵ Shift toward reactants'; }
+    }, 350);
+    // Step 3: settle
+    setTimeout(() => {
+      animBalanceTo(0, 1200);
+      if (et) { et.className='bal-eq-txt at-eq'; et.textContent='⚖️ New Equilibrium'; }
+    }, 2500);
+
+  } else {
+    // No shift — brief wobble + note
+    if (et && stressType) {
+      et.className='bal-eq-txt at-eq';
+      et.textContent = '⚡ ' + (DIST_LABELS[stressType] || 'Stress applied');
+    }
+    setTimeout(() => {
+      animBalanceTo(5, 280);
+      setTimeout(() => animBalanceTo(-5, 380), 280);
+      setTimeout(() => animBalanceTo(0, 500), 660);
+      if (et) { et.className='bal-eq-txt at-eq'; et.textContent='↔ No shift'; }
+    }, 350);
+    setTimeout(() => { if(et) { et.className='bal-eq-txt at-eq'; et.textContent='⚖️ Balanced'; }}, 1800);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// PE DIAGRAM — ΔH level shifts with temperature
+// ═══════════════════════════════════════════════════
+function drawPE() {
+  const canvas = (graphLargeMode && _lgPECanvas) ? _lgPECanvas : document.getElementById('pe');
+  if (!canvas) return;
+  if (!graphLargeMode) {
+    const pane = canvas.parentElement;
+    canvas.width  = Math.max(pane.clientWidth  || 300, 200);
+    canvas.height = Math.max(pane.clientHeight || 220, 160);
+  }
+  const ctx = canvas.getContext('2d');
+  const LG = graphLargeMode;
+  const W = canvas.width, H = canvas.height;
+  const FONT = getComputedStyle(document.body).fontFamily;
+  const s = SC[S.sc];
+  const PAD={l:LG?62:48, r:LG?28:18, t:LG?56:38, b:LG?44:34};
+  const dW=W-PAD.l-PAD.r, dH=H-PAD.t-PAD.b;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = nightMode ? (LG?'#0C0810':'#1E1420') : (LG?'#FFFFFF':'#FFF8F7');
+  ctx.fillRect(0,0,W,H);
+
+  const isExo = s.isExo, cat = S.catActive, tl = S.tempLevel;
+  const rE = isExo ? .65 : .30;
+  const pE = isExo ? .30 : .65;
+  const baseTop = Math.max(rE, pE);
+  const peakFrac = cat ? baseTop + (1-baseTop)*.42 : baseTop + (1-baseTop)*.88;
+  const toX = f => PAD.l + dW*f;
+  const toY = f => PAD.t + dH*(1-f);
+  const rY=toY(rE), pY=toY(Math.max(.05, Math.min(.95, pE))), pkY=toY(peakFrac);
+
+  // ── Colors (shared) ──
+  const curveCol  = LG ? (nightMode?'#FF7070':'#A81818') : (nightMode?'#E87070':'#C25D55');
+  const reColor   = nightMode ? (LG?'#40D8F8':'#5BB8D4') : (LG?'#0848A0':'#0E5A78');
+  const prColor   = nightMode ? (LG?'#70E840':'#6BBE45') : (LG?'#186010':'#1E6010');
+  const dHcolor   = isExo
+    ? (nightMode ? (LG?'#FF7A50':'#E84A30') : (LG?'#CC2000':'#E84A30'))
+    : (nightMode ? (LG?'#60C8FF':'#2080E0') : (LG?'#0050C0':'#2080E0'));
+  const axisColor = nightMode ? (LG?'#604040':'#4A2840') : (LG?'#A07070':'#DDBBBB');
+  const labelColor= nightMode ? (LG?'#C09080':'#8A6860') : (LG?'#704040':'#A87570');
+
+  if (LG) {
+    // ════════════════════════════════════════════
+    // EXPANDED MODE — standard instructional style
+    // ════════════════════════════════════════════
+
+    // Helper: filled arrowhead pointing in direction dy (+1=down, -1=up)
+    function arrowHead(x, y, dir, sz) {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x - sz*0.55, y - dir*sz);
+      ctx.lineTo(x + sz*0.55, y - dir*sz);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    const refGray  = nightMode ? 'rgba(200,180,180,.35)' : 'rgba(120,100,100,.3)';
+    const textMain = nightMode ? '#F0E0DC' : '#1A0808';
+    const textSub  = nightMode ? 'rgba(200,170,170,.7)' : 'rgba(90,50,50,.65)';
+
+    // ── 1. Horizontal reference lines at reactants, peak, products ──
+    ctx.save();
+    ctx.setLineDash([6, 5]);
+    ctx.strokeStyle = refGray;
+    ctx.lineWidth = 1.5;
+    // Reactants level — spans most of chart width
+    ctx.beginPath(); ctx.moveTo(PAD.l + 4, rY);  ctx.lineTo(PAD.l + dW - 4, rY);  ctx.stroke();
+    // Peak level
+    ctx.beginPath(); ctx.moveTo(PAD.l + 4, pkY); ctx.lineTo(PAD.l + dW - 4, pkY); ctx.stroke();
+    // Products level
+    ctx.beginPath(); ctx.moveTo(PAD.l + 4, pY);  ctx.lineTo(PAD.l + dW - 4, pY);  ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+
+    // ── Favored-side highlight (temperature stress) ──
+    if (tl !== 0) {
+      const rightFav = (isExo && tl<0) || (!isExo && tl>0);
+      ctx.save();
+      ctx.fillStyle = rightFav ? 'rgba(80,200,50,.1)' : 'rgba(40,140,220,.1)';
+      if (rightFav) ctx.fillRect(toX(.62), PAD.t, dW*.38, dH);
+      else          ctx.fillRect(PAD.l, PAD.t, dW*.38, dH);
+      ctx.restore();
+    }
+
+    // ── 2. Main energy curve — bold, clean ──
+    ctx.beginPath();
+    ctx.moveTo(toX(.05), rY);
+    ctx.lineTo(toX(.18), rY);
+    ctx.bezierCurveTo(toX(.3),rY, toX(.38),pkY, toX(.5),pkY);
+    ctx.bezierCurveTo(toX(.62),pkY, toX(.7),pY, toX(.82),pY);
+    ctx.lineTo(toX(.95), pY);
+    ctx.strokeStyle = curveCol; ctx.lineWidth = 6;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+
+    // ── 3. "Activated Complex" at peak ──
+    ctx.font = `700 15px ${FONT}`;
+    ctx.fillStyle = textMain;
+    ctx.textAlign = 'center';
+    ctx.fillText('Activated Complex', toX(.5), pkY - 12);
+    // Small dot at peak
+    ctx.beginPath(); ctx.arc(toX(.5), pkY, 4, 0, Math.PI*2);
+    ctx.fillStyle = curveCol; ctx.fill();
+
+    // ── 4. "Reactants" label on left plateau ──
+    ctx.font = `700 16px ${FONT}`;
+    ctx.fillStyle = reColor; ctx.textAlign = 'left';
+    ctx.fillText('Reactants', toX(.05), rY - 10);
+
+    // ── 5. "Products" label on right plateau ──
+    ctx.font = `700 16px ${FONT}`;
+    ctx.fillStyle = prColor; ctx.textAlign = 'right';
+    ctx.fillText('Products', toX(.95), pY - 10);
+
+    // ── 6. Ea arrow: reactants level → peak (left side) ──
+    const eaX   = toX(.28);
+    const eaColor = nightMode ? '#B090E8' : '#5030A0';
+    const arSz  = 7;
+    ctx.fillStyle   = eaColor;
+    ctx.strokeStyle = eaColor;
+    ctx.lineWidth   = 2.5;
+
+    // Shaft
+    ctx.beginPath(); ctx.moveTo(eaX, rY - arSz); ctx.lineTo(eaX, pkY + arSz); ctx.stroke();
+    // Arrowhead pointing up (toward peak)
+    arrowHead(eaX, pkY, 1, arSz);
+    // Tick at base (reactants level)
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(eaX-8, rY); ctx.lineTo(eaX+8, rY); ctx.stroke();
+
+    // "Ea (activation energy)" label — right of arrow, mid-height
+    ctx.font = `700 14px ${FONT}`;
+    ctx.fillStyle = eaColor;
+    ctx.textAlign = 'left';
+    ctx.fillText('Ea (activation energy)', eaX + 10, (rY + pkY)/2 + 5);
+
+    // ── 7. ΔH arrow: reactants level → products level (right side) ──
+    const dhX   = toX(.82);
+    ctx.fillStyle   = dHcolor;
+    ctx.strokeStyle = dHcolor;
+    ctx.lineWidth   = 2.5;
+
+    // For exo: arrow points down (products lower); endo: points up
+    const dhTop = Math.min(rY, pY);
+    const dhBot = Math.max(rY, pY);
+    const dhMid = (dhTop + dhBot) / 2;
+
+    // Shaft
+    ctx.beginPath(); ctx.moveTo(dhX, dhTop + arSz); ctx.lineTo(dhX, dhBot - arSz); ctx.stroke();
+    // Arrowhead at products end
+    if (isExo) arrowHead(dhX, pY, 1, arSz);   // pointing down
+    else       arrowHead(dhX, pY, -1, arSz);  // pointing up
+    // Tick at reactants level
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(dhX-8, rY); ctx.lineTo(dhX+8, rY); ctx.stroke();
+
+    // ΔH label — right of arrow
+    const dHval  = s.dH;
+    const dHsign = dHval < 0 ? '' : '+';
+    const dHtxt  = `ΔH = ${dHsign}${dHval} kJ`;
+    const dHtxt2 = isExo ? '(energy released)' : '(energy absorbed)';
+    ctx.font = `800 15px ${FONT}`;
+    ctx.fillStyle = dHcolor; ctx.textAlign = 'left';
+    ctx.fillText(dHtxt, dhX + 12, dhMid);
+    ctx.font = `600 12px ${FONT}`;
+    ctx.fillStyle = dHcolor;
+    ctx.fillText(dHtxt2, dhX + 12, dhMid + 17);
+
+    // ── 8. Catalyst note (if active) ──
+    if (cat) {
+      ctx.font = `700 14px ${FONT}`;
+      ctx.fillStyle = nightMode ? '#FFD040' : '#604000';
+      ctx.textAlign = 'center';
+      ctx.fillText('✨ Catalyst lowers Ea for both directions — equilibrium position unchanged', W/2, PAD.t - 22);
+    }
+
+    // ── 9. Temperature annotation pill (if temp stress applied) ──
+    if (tl !== 0) {
+      const rightFav  = (isExo && tl<0) || (!isExo && tl>0);
+      const kDecreases= (isExo && tl>0) || (!isExo && tl<0);
+      const tempDir   = tl > 0 ? '↑' : '↓';
+      const shiftTxt  = rightFav ? 'equilibrium shifts RIGHT →' : '← equilibrium shifts LEFT';
+      const kTxt      = kDecreases ? 'Equilibrium shifts left' : 'Equilibrium shifts right';
+      const shiftColor= rightFav
+        ? (nightMode ? '#60E040' : '#157010')
+        : (nightMode ? '#40B8F0' : '#0050B0');
+
+      const line1 = `Temperature ${tempDir}  →  ${shiftTxt}`;
+      ctx.font = `700 14px ${FONT}`;
+      const pillW = Math.min(ctx.measureText(line1).width + 28, dW * 0.9);
+      const pillH = 46;
+      const pillX = PAD.l;
+      const pillY = PAD.t - pillH - 10;
+
+      // Background
+      ctx.fillStyle = nightMode ? 'rgba(20,10,8,.88)' : 'rgba(255,250,248,.94)';
+      roundRect(ctx, pillX, pillY, pillW, pillH, 7); ctx.fill();
+      ctx.strokeStyle = shiftColor; ctx.lineWidth = 2;
+      roundRect(ctx, pillX, pillY, pillW, pillH, 7); ctx.stroke();
+
+      // Line 1
+      ctx.font = `700 14px ${FONT}`;
+      ctx.fillStyle = shiftColor; ctx.textAlign = 'left';
+      ctx.fillText(line1, pillX + 14, pillY + 18);
+
+      // Line 2
+      ctx.font = `600 12px ${FONT}`;
+      ctx.fillStyle = textSub;
+      ctx.fillText(`${kTxt}  ·  ΔH remains constant for this reaction`, pillX + 14, pillY + 35);
+    }
+
+    // ── 10. Axis lines ──
+    ctx.strokeStyle = nightMode ? 'rgba(180,140,140,.55)' : 'rgba(100,70,70,.45)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    // Y-axis (left vertical)
+    ctx.moveTo(PAD.l, PAD.t);
+    ctx.lineTo(PAD.l, PAD.t + dH);
+    // X-axis (bottom horizontal)
+    ctx.lineTo(PAD.l + dW, PAD.t + dH);
+    ctx.stroke();
+
+    // ── 10. Axis labels ──
+    ctx.fillStyle = labelColor;
+    ctx.font = `700 15px ${FONT}`;
+    ctx.textAlign = 'center';
+    ctx.fillText('Reaction Progress →', W/2, H - 8);
+    ctx.save(); ctx.translate(18, PAD.t + dH/2); ctx.rotate(-Math.PI/2);
+    ctx.font = `700 15px ${FONT}`; ctx.textAlign = 'center';
+    ctx.fillText('Potential Energy', 0, 0); ctx.restore();
+
+    // ── 11. Exothermic / Endothermic reaction type badge ──
+    const rxnLabel  = isExo ? '🔥  Exothermic Reaction' : '🧊  Endothermic Reaction';
+    const rxnBg     = isExo ? (nightMode?'rgba(255,90,30,.16)':'rgba(200,55,5,.09)')
+                             : (nightMode?'rgba(60,160,255,.16)':'rgba(8,80,200,.09)');
+    const rxnBorder = isExo ? (nightMode?'rgba(255,110,50,.65)':'rgba(160,45,5,.5)')
+                             : (nightMode?'rgba(70,170,255,.65)':'rgba(8,70,190,.5)');
+    const rxnColor  = isExo ? (nightMode?'#FF8858':'#A03000')
+                             : (nightMode?'#58B8FF':'#0040B0');
+    ctx.font = `800 18px ${FONT}`;
+    const badgeW = ctx.measureText(rxnLabel).width + 32;
+    const badgeH = 38;
+    const badgeX = toX(.5) - badgeW / 2;
+    // Place badge below the lower of the two energy plateaus (clear of all curve elements)
+    const badgeY = Math.max(rY, pY) + 18;
+    ctx.fillStyle = rxnBg;
+    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9); ctx.fill();
+    ctx.strokeStyle = rxnBorder; ctx.lineWidth = 2.5;
+    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 9); ctx.stroke();
+    ctx.fillStyle = rxnColor; ctx.textAlign = 'center';
+    ctx.fillText(rxnLabel, badgeX + badgeW/2, badgeY + 26);
+
+  } else {
+    // ════════════════════════════════════════════
+    // NORMAL (small panel) MODE — unchanged
+    // ════════════════════════════════════════════
+
+    // ── Favored-side glow ──
+    if(tl !== 0) {
+      const rightFav = (isExo && tl<0) || (!isExo && tl>0);
+      ctx.save();
+      ctx.strokeStyle = rightFav ? 'rgba(107,190,69,.45)' : 'rgba(91,184,212,.45)';
+      ctx.lineWidth=7; ctx.lineCap='round';
+      ctx.beginPath();
+      if(rightFav){ ctx.moveTo(toX(.72),pY); ctx.lineTo(toX(.95),pY); }
+      else        { ctx.moveTo(toX(.05),rY); ctx.lineTo(toX(.28),rY); }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ── Main energy curve ──
+    ctx.beginPath();
+    ctx.moveTo(toX(.05), rY);
+    ctx.lineTo(toX(.18), rY);
+    ctx.bezierCurveTo(toX(.3),rY, toX(.38),pkY, toX(.5),pkY);
+    ctx.bezierCurveTo(toX(.62),pkY, toX(.7),pY, toX(.82),pY);
+    ctx.lineTo(toX(.95), pY);
+    ctx.strokeStyle='#C25D55'; ctx.lineWidth=3; ctx.stroke();
+
+    // ── Ea dashed lines ──
+    ctx.save(); ctx.setLineDash([4,3]);
+    ctx.strokeStyle='#9B7FD4'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(toX(.11),rY); ctx.lineTo(toX(.11),pkY); ctx.stroke();
+    ctx.strokeStyle='#4BBFAD';
+    ctx.beginPath(); ctx.moveTo(toX(.36),pY); ctx.lineTo(toX(.36),pkY); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+
+    // ── ΔH bracket line ──
+    const dHcolorN = (pY < rY) ? '#2080E0' : '#E84A30';
+    ctx.save(); ctx.setLineDash([3,3]);
+    ctx.strokeStyle=dHcolorN; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(toX(.70),rY); ctx.lineTo(toX(.70),pY); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+
+    // ── Labels ──
+    const f6 = `600 10px ${FONT}`;
+    const f7 = `700 10px ${FONT}`;
+    ctx.font=f6;
+    ctx.fillStyle='#9B7FD4'; ctx.textAlign='left'; ctx.fillText('Ea fwd', toX(.12), (rY+pkY)/2+4);
+    ctx.fillStyle='#4BBFAD';                        ctx.fillText('Ea rev', toX(.37), (pY+pkY)/2+4);
+    const dHsign = isExo ? '< 0' : '> 0';
+    ctx.fillStyle=dHcolorN;
+    ctx.fillText('ΔH ' + dHsign, toX(.71), (rY+pY)/2+4);
+    ctx.font=f7;
+    const reN = nightMode?'#5BB8D4':'#0E5A78';
+    const prN = nightMode?'#6BBE45':'#1E6010';
+    ctx.fillStyle=reN; ctx.textAlign='left'; ctx.fillText('Reactants', toX(.04), rY-8);
+    ctx.fillStyle=prN;                       ctx.fillText('Products',  toX(.72), pY-8);
+
+    if(cat){
+      ctx.fillStyle=nightMode?'#C8A030':'#7A6000'; ctx.font=`italic 700 10px ${FONT}`;
+      ctx.fillText('✨ Catalyst: lowers both Ea', toX(.06), PAD.t-20);
+    }
+
+    if(tl !== 0) {
+      const rightFav = (isExo && tl<0) || (!isExo && tl>0);
+      const kDecreases = (isExo && tl>0) || (!isExo && tl<0);
+      const kTxt  = kDecreases ? 'Equilibrium shifts left' : 'Equilibrium shifts right';
+      const kColor = kDecreases ? (nightMode?'#F4A49D':'#C25D55') : (nightMode?'#6BBE45':'#1E6010');
+      const favColor = rightFav ? (nightMode?'#6BBE45':'#1E6010') : (nightMode?'#5BB8D4':'#0E5A78');
+      const favTxt = rightFav ? '⟶ Products favored' : 'Reactants favored ⟵';
+      ctx.font=`700 10px ${FONT}`;
+      ctx.fillStyle=favColor; ctx.textAlign='center';
+      ctx.fillText(favTxt, W/2, PAD.t-24);
+      ctx.fillStyle=kColor;
+      ctx.font=`italic 700 9px ${FONT}`;
+      ctx.fillText(kTxt, W/2, PAD.t-12);
+      ctx.fillStyle=nightMode?'rgba(200,160,160,.65)':'rgba(120,80,70,.55)';
+      ctx.font=`600 8px ${FONT}`;
+      ctx.fillText('ΔH remains constant for this reaction', W/2, PAD.t-1);
+    }
+
+    ctx.fillStyle = nightMode?'#8A6860':'#A87570';
+    ctx.font=f6; ctx.textAlign='center';
+    // Axis lines
+    ctx.strokeStyle = nightMode ? 'rgba(160,120,120,.5)' : 'rgba(100,70,70,.4)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(PAD.l, PAD.t);
+    ctx.lineTo(PAD.l, PAD.t + dH);
+    ctx.lineTo(PAD.l + dW, PAD.t + dH);
+    ctx.stroke();
+    ctx.fillText('Reaction Progress →', W/2, H-4);
+    ctx.save(); ctx.translate(14,H/2); ctx.rotate(-Math.PI/2);
+    ctx.fillText('Potential Energy', 0, 0); ctx.restore();
+  }
+
+  // Auto-refresh PE modal when normal PE redraws
+  if (!graphLargeMode && typeof modalGraphType !== 'undefined'
+      && modalGraphType === 'pe'
+      && document.getElementById('graphModal').classList.contains('open')) {
+    const lp = document.getElementById('pe-large');
+    if (lp) drawPEOnCanvas('pe-large');
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// PARTICLES
+// ═══════════════════════════════════════════════════
+let particles=[], animId=null, BSPD=1.0, pSpeed=BSPD;
+
+function concToPCount(c){ return Math.max(4, Math.min(26, Math.round(c*2.4+2))); }
+
+function startParticles(){
+  if(animId) cancelAnimationFrame(animId);
+  requestAnimationFrame(()=>{
+    const cv=document.getElementById('pc');
+    const ct=document.getElementById('rxnCont');
+    const W=ct.clientWidth||420, H=ct.clientHeight||230;
+    cv.width=W; cv.height=H; pSpeed=BSPD; particles=[];
+    const rN=concToPCount(S.rC), pN=concToPCount(S.pC);
+    for(let i=0;i<rN;i++) particles.push(mkP('r',W,H));
+    for(let i=0;i<pN;i++) particles.push(mkP('p',W,H));
+    animP();
+  });
+}
+
+function mkP(t,W,H){
+  const a=Math.random()*Math.PI*2, sp=pSpeed*(.65+Math.random()*.7);
+  return {
+    t, r:Math.random()*3.5+4,
+    x: t==='r' ? Math.random()*(W/2-24)+8 : Math.random()*(W/2-24)+W/2+8,
+    y: Math.random()*(H-28)+14,
+    vx:Math.cos(a)*sp, vy:Math.sin(a)*sp,
+    al:.65+Math.random()*.3, W, H
+  };
+}
+
+function animP(){
+  const cv=document.getElementById('pc'); if(!cv) return;
+  const ctx=cv.getContext('2d'); const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+
+  // ── Particle-particle collision detection (same side only) ──
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const a=particles[i], b=particles[j];
+      // Only collide particles on the same side
+      if(a.t!==b.t) continue;
+      const dx=b.x-a.x, dy=b.y-a.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const minDist=a.r+b.r;
+      if(dist<minDist&&dist>0){
+        // Elastic collision: swap velocity components along collision axis
+        const nx=dx/dist, ny=dy/dist;
+        const dvx=a.vx-b.vx, dvy=a.vy-b.vy;
+        const dot=dvx*nx+dvy*ny;
+        if(dot>0){ // only resolve if moving toward each other
+          a.vx-=dot*nx; a.vy-=dot*ny;
+          b.vx+=dot*nx; b.vy+=dot*ny;
+          // Flash: briefly brighten colliding particles
+          a.flash=3; b.flash=3;
+        }
+        // Separate overlapping particles
+        const overlap=(minDist-dist)*0.5;
+        a.x-=overlap*nx; a.y-=overlap*ny;
+        b.x+=overlap*nx; b.y+=overlap*ny;
+      }
+    }
+  }
+
+  for(const p of particles){
+    p.x+=p.vx; p.y+=p.vy;
+    const lB=p.t==='r'?p.r:W/2+p.r, rB=p.t==='r'?W/2-p.r:W-p.r;
+    if(p.x<lB||p.x>rB){ p.vx*=-1; p.x=Math.max(lB,Math.min(rB,p.x)); }
+    if(p.y<p.r||p.y>H-p.r){ p.vy*=-1; p.y=Math.max(p.r,Math.min(H-p.r,p.y)); }
+
+    // Draw with collision flash
+    const fl = p.flash||0;
+    if(fl>0) p.flash=fl-1;
+    const boost = fl>0 ? 0.35 : 0;
+    const al = Math.min(1, p.al + boost);
+
+    const g=ctx.createRadialGradient(p.x-p.r*.3,p.y-p.r*.3,p.r*.08,p.x,p.y,p.r);
+    if(p.t==='r'){
+      g.addColorStop(0,fl>0?`rgba(240,248,255,${al})`:`rgba(180,228,248,${al})`);
+      g.addColorStop(1,fl>0?`rgba(100,200,240,${al*.9})`:`rgba(38,160,200,${al*.8})`);
+    } else {
+      g.addColorStop(0,fl>0?`rgba(240,255,220,${al})`:`rgba(196,242,160,${al})`);
+      g.addColorStop(1,fl>0?`rgba(120,220,60,${al*.9})`:`rgba(68,150,28,${al*.8})`);
+    }
+    ctx.beginPath(); ctx.arc(p.x,p.y,fl>0?p.r*1.15:p.r,0,Math.PI*2);
+    ctx.fillStyle=g; ctx.fill();
+    const ringAlpha = fl>0 ? .85 : .45;
+    ctx.strokeStyle=p.t==='r'?`rgba(20,130,170,${ringAlpha})`:`rgba(48,120,18,${ringAlpha})`;
+    ctx.lineWidth=fl>0?1.8:1; ctx.stroke();
+  }
+  animId=requestAnimationFrame(animP);
+}
+
+function syncParticles(){
+  const cv=document.getElementById('pc'); if(!cv) return;
+  const W=cv.width,H=cv.height;
+  const rT=concToPCount(S.rC), pT=concToPCount(S.pC);
+  let rN=particles.filter(p=>p.t==='r').length;
+  let pN=particles.filter(p=>p.t==='p').length;
+  while(rN<rT){particles.push(mkP('r',W,H));rN++;}
+  while(rN>rT){const i=particles.findIndex(p=>p.t==='r');if(i>-1){particles.splice(i,1);rN--;}else break;}
+  while(pN<pT){particles.push(mkP('p',W,H));pN++;}
+  while(pN>pT){const i=particles.findIndex(p=>p.t==='p');if(i>-1){particles.splice(i,1);pN--;}else break;}
+}
+
+function boostParticles(){
+  pSpeed=BSPD*2.2;
+  particles.forEach(p=>{p.vx*=2.2;p.vy*=2.2;});
+  const tb=document.getElementById('tmpBadge');
+  tb.textContent='✨ Catalyst: faster reactions!'; tb.className='tmp-badge tmp-hot';
+  setTimeout(updateTempBadge,3000);
+}
+
+// ═══════════════════════════════════════════════════
+// UI UPDATES
+// ═══════════════════════════════════════════════════
+function updateUI(){ updateBars(); updateStats(); updateTempBadge(); }
+
+function updateBars(){
+  const rP=(S.rC/10*100).toFixed(0), pP=(S.pC/10*100).toFixed(0);
+  document.getElementById('rBar').style.width=rP+'%';
+  document.getElementById('pBar').style.width=pP+'%';
+  document.getElementById('rBarVal').textContent=S.rC.toFixed(1)+' M';
+  document.getElementById('pBarVal').textContent=S.pC.toFixed(1)+' M';
+  // Update bg intensity
+  const lSide=document.querySelector('.body .center .rxn-cont');
+}
+
+function updateKDisplay(){ return; // K display hidden — not NYS Regents
+
+  // K is now shown in stats strip — updateStats handles it
+  updateStats();
+}
+
+function updateTempBadge(){
+  const tb=document.getElementById('tmpBadge');
+  if(S.tempLevel>0)       { tb.textContent='🔥 Temp: High'+(S.tempLevel>1?'+':''); tb.className='tmp-badge tmp-hot'; }
+  else if(S.tempLevel<0)  { tb.textContent='❄️ Temp: Low'+(S.tempLevel<-1?'+':'');  tb.className='tmp-badge tmp-cold'; }
+  else                    { tb.textContent='🌡️ Normal Temp'; tb.className='tmp-badge'; }
+}
+
+function setStatus(msg, type='neutral'){
+  const el=document.getElementById('statusMsg');
+  el.textContent=msg;
+  el.style.borderLeftColor = type==='warn'?'#E06060':type==='good'?'#6BBE45':'var(--shell-pink)';
+}
+
+function stressLabel(t){
+  return {
+    'add-reactant':'+R','rem-reactant':'-R','add-product':'+P','rem-product':'-P',
+    'temp-up':'🔥T','temp-down':'❄T','press-up':'↑P','press-down':'↓P',
+    'catalyst':'Cat','inert':'Inert'
+  }[t]||'?';
+}
+
+// ═══════════════════════════════════════════════════
+// EXPLAIN DRAWER TOGGLE (center panel)
+// ═══════════════════════════════════════════════════
+let explainOpen = false;
+
+function toggleExplain() {
+  explainOpen = !explainOpen;
+  const btn = document.getElementById('explainToggleBtn');
+  const drawer = document.getElementById('explainDrawer');
+  btn.classList.toggle('open', explainOpen);
+  drawer.classList.toggle('open', explainOpen);
+}
+
+function openExplainDrawer() {
+  // Called when content is updated — just mark button as having content, don't force open
+  document.getElementById('explainToggleBtn').classList.add('has-content');
+}
+
+// ═══════════════════════════════════════════════════
+// POPUP (Ref Card only)
+// ═══════════════════════════════════════════════════
+function togglePopup(name) {
+  const popup = document.getElementById('popup'+name.charAt(0).toUpperCase()+name.slice(1));
+  const btn   = document.getElementById('btn'+name.charAt(0).toUpperCase()+name.slice(1));
+  if (!popup) return;
+  const isOpen = popup.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.popup-panel').forEach(p=>p.classList.remove('open'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+  if (!isOpen) {
+    popup.classList.add('open');
+    if(btn) btn.classList.add('active');
+    setTimeout(()=>{ drawChart(); drawPE(); }, 280);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// NIGHT / DAY MODE
+// ═══════════════════════════════════════════════════
+let nightMode = false;
+function toggleNight() {
+  nightMode = !nightMode;
+  document.documentElement.classList.toggle('dark', nightMode);
+  document.body.classList.toggle('dark', nightMode);
+  const btn = document.getElementById('nightBtn');
+  btn.textContent = nightMode ? '☀️ Day' : '🌙 Night';
+  setTimeout(()=>{ drawChart(); drawPE(); drawBalance(balAngle); }, 50);
+}
+
+// ═══════════════════════════════════════════════════
+// STATS STRIP UPDATES
+// ═══════════════════════════════════════════════════
+const BASE_TEMP_K = 298;   // Standard temp
+const BASE_PRESS  = 101.3; // kPa
+let currentTempK  = BASE_TEMP_K;
+let currentPress  = BASE_PRESS;
+
+function updateStats() {
+  const s = SC[S.sc];
+
+  // ΔH: adjust based on tempLevel (product energy shift)
+  const pE_base = s.isExo ? .30 : .65;
+  const pE_shifted = pE_base + S.tempLevel * 0.06;
+  const rE_base = s.isExo ? .65 : .30;
+  // ΔH fraction = products - reactants energy (negative = exo)
+  const dH_shift_factor = 1 + S.tempLevel * 0.08;
+  const dH_display = (s.dH * dH_shift_factor).toFixed(1);
+
+  // Temperature
+  currentTempK = BASE_TEMP_K + S.tempLevel * 50;
+  const tempC = (currentTempK - 273).toFixed(0);
+  const tempDesc = S.tempLevel > 1 ? 'High+' : S.tempLevel > 0 ? 'High' :
+                   S.tempLevel < -1 ? 'Low+' : S.tempLevel < 0 ? 'Low' : 'Standard';
+
+  // Pressure
+  currentPress = BASE_PRESS * Math.pow(1.4, S.pressLevel || 0);
+  const pressDisplay = currentPress.toFixed(1);
+  const pressDesc = (S.pressLevel||0) > 0 ? 'Increased' : (S.pressLevel||0) < 0 ? 'Decreased' : 'Standard';
+
+  // K
+  const atEq = Math.abs(S.pC/S.rC - S.K) < .4;
+
+  flashStat('statDHval', dH_display);
+  flashStat('statTempval', currentTempK + ' K');
+  flashStat('statPressval', pressDisplay + ' kPa');
+
+  document.getElementById('statDHsub').textContent  = s.isExo ? 'Exothermic' : 'Endothermic';
+  document.getElementById('statTempsub').textContent = tempC + ' °C · ' + tempDesc;
+  document.getElementById('statPresssub').textContent = pressDesc;
+  document.getElementById('kVal').textContent  = S.K.toFixed(2);
+  document.getElementById('kSts').textContent  = atEq ? '✅ Equilibrium' : '🔄 Shifting…';
+
+  // Thermo badge
+  const tb = document.getElementById('thermoBadge');
+  tb.textContent = s.isExo ? 'Exothermic ΔH < 0' : 'Endothermic ΔH > 0';
+  tb.className = 'badge ' + (s.isExo ? 'exo' : 'endo');
+}
+
+function flashStat(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  const card = el.closest('.stat-card');
+  if (card) { card.classList.remove('changing'); void card.offsetWidth; card.classList.add('changing'); }
+}
+
+// ═══════════════════════════════════════════════════
+// EXPLAIN
+// ═══════════════════════════════════════════════════
+function updateExplain(type, shift, kChange){
+  const s=SC[S.sc];
+  document.getElementById('exWhat').textContent      = getWhat(type,s);
+  document.getElementById('exResp').textContent      = getResp(type,shift,s);
+  document.getElementById('exShift').textContent     = getShiftTxt(shift,s);
+  document.getElementById('exK').textContent         = getKTxt(type,kChange,s);
+  document.getElementById('exTip').textContent       = getTip(type,s);
+  document.getElementById('exCollision').textContent = getCollision(type,shift,s);
+  document.querySelectorAll('.ex-card').forEach(c=>{
+    c.classList.remove('slide-in'); void c.offsetWidth; c.classList.add('slide-in');
+  });
+  setStatus(getStatusMsg(type,shift), shift==='none'?'neutral':'good');
+  openExplainDrawer();
+  setTimeout(()=>{ drawPE(); drawChart(); updateStats(); }, 100);
+}
+
+function getWhat(t,s){ const m={
+  'add-reactant':`More ${s.rLbl} was added, immediately increasing reactant concentration. The system shifts to restore equilibrium.`,
+  'rem-reactant':`Some ${s.rLbl} was removed, decreasing reactant concentration. The system shifts to restore equilibrium.`,
+  'add-product': `More ${s.pLbl} was added, increasing product concentration. The system shifts to restore equilibrium.`,
+  'rem-product': `Some ${s.pLbl} was removed, decreasing product concentration. The system shifts to restore equilibrium.`,
+  'temp-up':     `Temperature was increased. For this ${s.isExo?'exothermic':'endothermic'} reaction, heat is treated as a ${s.isExo?'product':'reactant'}.`,
+  'temp-down':   `Temperature was decreased. For this ${s.isExo?'exothermic':'endothermic'} reaction, heat is treated as a ${s.isExo?'product':'reactant'}.`,
+  'press-up':    s.gasEffect?`Pressure was increased (volume decreased). This shifts the equilibrium toward the side with fewer moles of gas.`:`Pressure was increased, but this reaction has equal moles of gas on both sides — no net effect.`,
+  'press-down':  s.gasEffect?`Pressure was decreased (volume increased). This shifts equilibrium toward the side with more moles of gas.`:`Pressure was decreased, but equal moles of gas on both sides means no net effect.`,
+  'catalyst':    `A catalyst was added. Catalysts provide an alternative reaction pathway with LOWER activation energy for BOTH forward and reverse reactions.`,
+  'inert':       `An inert (noble) gas was added at constant volume. Inert gases don't participate in the reaction and don't change any partial pressures.`
+}; return m[t]||'A stress was applied.'; }
+
+function getResp(t,shift,s){
+  // "What stayed the same" — scientifically accurate, student-friendly
+  let stayedSame;
+  if(t==='catalyst'){
+    stayedSame = '📌 Stayed the same: Equilibrium position and ΔH unchanged. Only Ea (activation energy) decreased — reactions reach equilibrium faster, not differently.';
+  } else if(t==='inert'){
+    stayedSame = '📌 Stayed the same: All concentrations, ΔH, and equilibrium position — all completely unchanged.';
+  } else if(t==='temp-up'||t==='temp-down'){
+    stayedSame = '📌 Stayed the same: ΔH is a fixed property of this reaction and does NOT change. The energy levels of reactants and products do not shift.';
+  } else {
+    stayedSame = '📌 Stayed the same: ΔH is unchanged — the system simply shifts position to oppose the stress and restore equilibrium.';
+  }
+
+  if(shift==='right'){
+    const dir = t.startsWith('add-r')||t==='rem-product'||t==='press-up'||t==='press-down'
+      ? `more ${s.pLbl} produced` : `more ${s.pLbl} produced`;
+    return `CHANGED: Equilibrium shifted RIGHT — ${dir}. Reactant concentrations ↓, product concentrations ↑, rates re-equalized. ${stayedSame}`;
+  }
+  if(shift==='left'){
+    return `CHANGED: Equilibrium shifted LEFT — more ${s.rLbl} regenerated. Product concentrations ↓, reactant concentrations ↑, rates re-equalized. ${stayedSame}`;
+  }
+  if(t==='catalyst') return `CHANGED: Both forward and reverse reaction rates increased equally — equilibrium is reached FASTER. ${stayedSame}`;
+  if(t==='inert')    return `NOTHING CHANGED: ${stayedSame}`;
+  return `No shift. ${stayedSame}`;
+}
+
+function getShiftTxt(shift,s){
+  if(shift==='right') return `⇒ Shifted RIGHT. More ${s.pLbl} was produced. Reactant concentrations decreased, product concentrations increased until new equilibrium.`;
+  if(shift==='left')  return `⇐ Shifted LEFT. More ${s.rLbl} was regenerated. Product concentrations decreased, reactant concentrations increased until new equilibrium.`;
+  return `↔ No shift. Equilibrium position is unchanged.`;
+}
+
+function getKTxt(t,kChange,s){
+  if(!kChange) return `K is UNCHANGED. Only temperature changes the equilibrium constant. All other stresses shift the position but K stays the same.`;
+  if(t==='temp-up')   return s.isExo ? `K DECREASED. Increasing temp of an exothermic reaction shifts LEFT — fewer products relative to reactants, so K decreases.` : `K INCREASED. Increasing temp of an endothermic reaction shifts RIGHT — more products relative to reactants, so K increases.`;
+  if(t==='temp-down') return s.isExo ? `K INCREASED. Decreasing temp of an exothermic reaction shifts RIGHT — more products, so K increases.` : `K DECREASED. Decreasing temp of an endothermic reaction shifts LEFT — fewer products, so K decreases.`;
+  return `K changed with temperature.`;
+}
+
+function getTip(t,s){ const m={
+  'add-reactant':   `📝 Regents Tip: Adding a reactant disturbs equilibrium — the system shifts RIGHT to restore balance. Equilibrium position shifts but is re-established.`,
+  'rem-reactant':   `📝 Regents Tip: Removing a reactant disturbs equilibrium — the system shifts LEFT to restore balance. Removing a product (like NH₃ in the Haber process) drives the reaction forward — key industrial strategy!`,
+  'add-product':    `📝 Regents Tip: Adding a product disturbs equilibrium — the system shifts LEFT to restore balance. The equilibrium position shifts but is re-established.`,
+  'rem-product':    `📝 Regents Tip: Removing a product disturbs equilibrium — the system shifts RIGHT to restore balance. This strategy increases industrial yields!`,
+  'temp-up':        s.isExo?`📝 Regents Tip: Exothermic reaction — heat is a PRODUCT. Adding heat (increasing temperature) shifts equilibrium LEFT. Exothermic reactions are less favorable at high temperature!`:`📝 Regents Tip: Endothermic reaction — heat is a REACTANT. Adding heat (increasing temperature) shifts equilibrium RIGHT. Endothermic reactions are more favorable at high temperature!`,
+  'temp-down':      s.isExo?`📝 Regents Tip: Cooling an exothermic reaction shifts RIGHT (more products). This is why the Haber process uses lower temperature for better NH₃ yield.`:`📝 Regents Tip: Cooling an endothermic reaction shifts LEFT. Temperature is the only stress that shifts equilibrium without a concentration change.`,
+  'press-up':       s.gasEffect?`📝 Regents Tip: Unequal gas moles — high pressure favors the side with FEWER moles of gas. Count the coefficients!`:`📝 Regents Tip: Equal gas moles on each side → pressure has NO effect. Classic Regents trap — always count gas coefficients first!`,
+  'press-down':     s.gasEffect?`📝 Regents Tip: Lower pressure favors the side with MORE moles of gas. In the Haber process: 4 mol → 2 mol, so low pressure favors reactants.`:`📝 Regents Tip: Equal moles both sides → no pressure effect on equilibrium position.`,
+  'catalyst':       `📝 Regents Tip: MAJOR exam topic! Catalyst: (1) lowers Ea for BOTH directions, (2) does NOT change equilibrium position, (3) does NOT change K, (4) equilibrium reached FASTER only.`,
+  'inert':          `📝 Regents Tip: Inert gas at constant volume = NO effect. It doesn't change partial pressures of reactants or products. Classic Regents trick question!`
+}; return m[t]||'Apply a stress to see a Regents tip!'; }
+
+function getCollision(t,shift,s){
+  const rHigh = S.rC > 6.5, pHigh = S.pC > 6.5;
+  const tempHot = S.tempLevel > 0, tempCold = S.tempLevel < 0;
+  const m={
+    'add-reactant':
+      `Adding more ${s.rLbl} increases the concentration of reactant particles, which INCREASES forward collision frequency. More reactant molecules are bumping into each other per second — this raises the forward reaction rate above the reverse rate, causing the RIGHT shift. As the system re-equilibrates, forward collisions gradually decrease and reverse collisions increase until the rates equalize again.`,
+    'rem-reactant':
+      `Removing ${s.rLbl} decreases reactant particle concentration, so forward collisions happen LESS frequently. Fewer reactant molecules means fewer productive collisions per second. The reverse reaction rate now exceeds the forward rate, causing the LEFT shift. The system compensates by producing more reactant until collision frequencies balance.`,
+    'add-product':
+      `Adding ${s.pLbl} increases product particle density, raising reverse collision frequency immediately. More product molecules collide more often, driving the reaction back LEFT. This is exactly why removing products (like in the Haber process) is used industrially — it keeps reverse collision frequency low and drives the forward reaction continuously.`,
+    'rem-product':
+      `Removing ${s.pLbl} drops the product concentration, sharply decreasing reverse collision frequency. With fewer product molecules available to collide, the reverse rate drops below the forward rate. The system responds by producing more products until collision frequencies equalize at the new equilibrium.`,
+    'temp-up':
+      `Increasing temperature dramatically raises the KINETIC ENERGY of ALL molecules. Higher kinetic energy means particles move faster, collide MORE frequently, and — crucially — collide with MORE energy. Both forward and reverse collision frequencies increase, BUT the endothermic direction gets a proportionally bigger boost. For this ${s.isExo?'exothermic':'endothermic'} reaction, the ${s.isExo?'reverse (endothermic)':'forward (endothermic)'} direction benefits most, causing the ${s.isExo?'LEFT':'RIGHT'} shift. This is why the equilibrium position shifts — temperature changes the fundamental ratio of productive collisions.`,
+    'temp-down':
+      `Decreasing temperature reduces the kinetic energy of all molecules. Slower-moving particles collide LESS frequently and with LESS energy, lowering both forward and reverse reaction rates. The exothermic direction is less affected by cooling, so for this ${s.isExo?'exothermic':'endothermic'} reaction, the ${s.isExo?'forward':'reverse'} direction is now relatively favored. The equilibrium position shifts because the collision energy distribution has fundamentally changed.`,
+    'press-up':
+      s.gasEffect
+        ? `Increasing pressure (decreasing volume) forces ALL gas molecules closer together. This dramatically increases collision frequency for EVERY gas species — molecules have less space and collide far more often. The system shifts toward the side with FEWER moles of gas because that side produces the least number of molecules, which best relieves the overcrowded collision pressure.`
+        : `Pressure was increased, but since this reaction has equal moles of gas on both sides, the collision frequency increases equally for both forward and reverse reactions. Both rates rise together, so the equilibrium position doesn't change — the collision balance remains the same.`,
+    'press-down':
+      s.gasEffect
+        ? `Decreasing pressure (increasing volume) spreads gas molecules farther apart, reducing collision frequency for ALL species. With lower collision rates overall, the system compensates by shifting toward the side with MORE moles of gas — producing more molecules increases collision frequency, helping restore the previous reaction rates.`
+        : `Decreasing pressure spreads molecules out equally for both sides. Since gas moles are equal on both sides of this reaction, both forward and reverse collision frequencies decrease proportionally. No net shift in collision balance means no shift in equilibrium.`,
+    'catalyst':
+      `A catalyst provides an alternative reaction pathway with LOWER activation energy — meaning a greater fraction of molecular collisions now have enough energy to be PRODUCTIVE (result in reaction). Both the forward and reverse reaction rates increase equally because the catalyst lowers Ea for BOTH directions. Crucially, the ratio of forward to reverse productive collisions stays the same, so the equilibrium position doesn't change. Equilibrium is just reached FASTER!`,
+    'inert':
+      `The inert gas molecules don't participate in the reaction and don't change the concentration or partial pressure of any reactant or product. Since reaction rates depend on the frequency of collisions between reacting molecules, and those concentrations are unchanged, forward and reverse collision frequencies remain equal. No disturbance to the collision balance means no shift.`
+  };
+  return m[t] || `At equilibrium, forward and reverse reaction rates are equal because molecular collisions in both directions occur at the same frequency. Apply a stress to see how collision frequency changes!`;
+}
+
+function getStatusMsg(t,shift){
+  if(shift==='right') return '➡️ Equilibrium shifted RIGHT — system compensated for the stress!';
+  if(shift==='left')  return '⬅️ Equilibrium shifted LEFT — system compensated for the stress!';
+  if(t==='catalyst')  return '✨ Catalyst added — equilibrium reached FASTER, same position!';
+  if(t==='inert')     return '💨 Inert gas added — NO effect at constant volume!';
+  return '↔️ No shift — equilibrium position unchanged.';
+}
+
+// ═══════════════════════════════════════════════════
+// MODE
+// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// MICRO-FEEDBACK TOAST
+// ═══════════════════════════════════════════════════
+let microTimer = null;
+const MICRO_MSGS = {
+  'add-reactant': '➕ Reactant added ↑ — system shifts right',
+  'rem-reactant': '➖ Reactant removed ↓ — system shifts left',
+  'add-product':  '➕ Product added ↑ — system shifts left',
+  'rem-product':  '➖ Product removed ↓ — system shifts right',
+  'temp-up':      '🔥 Temperature increased → kinetic energy ↑',
+  'temp-down':    '❄️ Temperature decreased → kinetic energy ↓',
+  'press-up':     '🔼 Pressure increased → volume ↓',
+  'press-down':   '🔽 Pressure decreased → volume ↑',
+  'catalyst':     '✨ Catalyst added → faster rate, no shift',
+  'inert':        '💨 Inert gas added → no effect at constant volume'
+};
+function showMicro(type) {
+  const el = document.getElementById('microToast');
+  if (!el) return;
+  el.textContent = MICRO_MSGS[type] || '';
+  el.classList.add('show');
+  clearTimeout(microTimer);
+  microTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ═══════════════════════════════════════════════════
+// RATES OVERLAY
+// ═══════════════════════════════════════════════════
+let showRates = false;
+// rateHistory stores {fwd, rev} at each time step
+let rateHist = { fwd:[], rev:[] };
+
+function toggleRates() {
+  showRates = document.getElementById('ratesToggle').checked;
+  drawChart();
+}
+
+function pushRatePoint() {
+  // Forward rate ∝ [Reactant]; Reverse rate ∝ [Product]; normalized to base 5
+  const fwd = (S.rC / 5.0).toFixed(3);
+  const rev = (S.pC / 5.0).toFixed(3);
+  rateHist.fwd.push(parseFloat(fwd));
+  rateHist.rev.push(parseFloat(rev));
+}
+
+// ═══════════════════════════════════════════════════
+// REGENTS — CONFIDENCE + LOCK ANSWER
+// ═══════════════════════════════════════════════════
+let S_confidence = null; // 'high' | 'med' | 'low'
+let S_locked = false;
+
+function selConf(level, el) {
+  S_confidence = level;
+  document.querySelectorAll('#confStep .po').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  // Show lock button
+  document.getElementById('lockBtn').style.display = 'block';
+}
+
+function lockAnswer() {
+  if (!S.preds.shift || !S_confidence) return;
+  S_locked = true;
+  document.getElementById('lockBtn').style.display = 'none';
+  document.getElementById('revBtn').style.display = 'block';
+  document.getElementById('revBtn').disabled = false;
+  // Lock the prediction options so they can't change
+  document.querySelectorAll('.rp .po').forEach(b => b.style.pointerEvents = 'none');
+  document.getElementById('confStep').style.opacity = '0.6';
+  setStatus('🔒 Answer locked! Click Reveal to see if you\'re right.','neutral');
+}
+
+function checkRevealReady() {
+  const ready = S.preds.shift !== null;
+  if (ready) {
+    document.getElementById('confStep').style.display = 'block';
+  }
+  // Lock button shown only after confidence selected
+}
+
+function setMode(m){
+  S.mode=m;
+  document.getElementById('btnLearn').classList.toggle('active',m==='learn');
+  document.getElementById('btnRegents').classList.toggle('active',m==='regents');
+  document.getElementById('scoreBar').style.display=m==='regents'?'flex':'none';
+  if(m==='learn'){ showRegPanel(false); S.revealed=true; }
+  setStatus(m==='learn'?'🎓 Learn Mode: Apply stresses and watch the system respond!':'🏆 Regents Mode: Predict before you reveal — earn points!','neutral');
+}
+
+// ═══════════════════════════════════════════════════
+// REGENTS PANEL
+// ═══════════════════════════════════════════════════
+function showRegPanel(show){
+  const p=document.getElementById('regPanel');
+  p.classList.toggle('visible',show);
+  if(show){
+    document.querySelectorAll('.po').forEach(b=>{b.classList.remove('sel','correct','wrong');b.style.pointerEvents='';});
+    document.getElementById('revBtn').disabled=true;
+    document.getElementById('revBtn').style.display='none';
+    document.getElementById('lockBtn').style.display='none';
+    document.getElementById('confStep').style.display='none';
+    document.getElementById('confStep').style.opacity='1';
+    S_confidence=null; S_locked=false;
+    updateHintBtn();
+    const oldT=document.getElementById('hintToast'); if(oldT) oldT.remove();
+  }
+}
+
+function selPredict(type,val,el){
+  if(S.revealed) return;
+  el.parentElement.querySelectorAll('.po').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  S.preds[type]=val;
+  checkRevealReady();
+}
+
+function revealAnswer(){
+  S.revealed=true;
+  execStress(S.pending);
+  const cS=correctShift(S.pending), cK=correctK(S.pending);
+  const ok = S.preds.shift===cS; // K not assessed (not NYS Regents)
+  if(ok){
+    S.score.c++; S.score.streak++;
+    const msg = S.score.streak>=10?'🏆 10 Streak!':S.score.streak>=5?'⚡ 5 in a row!':S.score.streak>=3?'🔥 3 Streak!':'🎉 Correct!';
+    showCelebration(msg);
+    setStatus('🎉 Correct! Great reasoning!','good');
+  } else {
+    S.score.w++; S.score.streak=0;
+    showWrongFlash();
+    // Extra feedback for high-confidence wrong answers
+    if(S_confidence==='high'){
+      setStatus('📚 Incorrect — and you were highly confident! This is a common misconception. Read the explanation carefully.','warn');
+      setTimeout(()=>{
+        const drawer=document.getElementById('explainDrawer');
+        if(!drawer.classList.contains('open')){ toggleExplain(); }
+      },800);
+    } else {
+      setStatus('📚 Not quite — check the Explanation for details!','warn');
+    }
+  }
+  document.getElementById('scCorrect').textContent=S.score.c;
+  document.getElementById('scWrong').textContent=S.score.w;
+  const si=document.getElementById('streakItem');
+  if(S.score.streak>=3) si.innerHTML=`<span class="fire">🔥</span> Streak: <span class="sn" id="scStreak">${S.score.streak}</span>`;
+  else si.innerHTML=`🔥 Streak: <span class="sn" id="scStreak">${S.score.streak}</span>`;
+  gradePredict('shift',cS); // K prediction not graded
+  document.getElementById('revBtn').disabled=true;
+  document.getElementById('hintBtn').disabled=true;
+}
+
+function gradePredict(type,correct){
+  const rows=document.querySelectorAll('.rp-row');
+  const row=type==='shift'?rows[0]:rows[1];
+  row.querySelectorAll('.po').forEach(btn=>{
+    const v=btn.textContent.trim();
+    const m={'→ Right':'right','← Left':'left','No Shift':'none','Increase':'increase','Decrease':'decrease','Stay Same':'same'};
+    if(m[v]===correct) btn.classList.add('correct');
+    else if(btn.classList.contains('sel')) btn.classList.add('wrong');
+  });
+}
+
+function correctShift(t){
+  const s=SC[S.sc];
+  const map={'add-reactant':'right','rem-reactant':'left','add-product':'left','rem-product':'right',
+    'catalyst':'none','inert':'none'};
+  if(map[t]) return map[t];
+  if(t==='temp-up')   return s.isExo?'left':'right';
+  if(t==='temp-down') return s.isExo?'right':'left';
+  if(t==='press-up')  return s.gasEffect?(s.pFavRight?'right':'left'):'none';
+  if(t==='press-down') return s.gasEffect?(s.pFavRight?'left':'right'):'none';
+  return 'none';
+}
+
+function correctK(t){
+  if(t==='temp-up')   return SC[S.sc].isExo?'decrease':'increase';
+  if(t==='temp-down') return SC[S.sc].isExo?'increase':'decrease';
+  return 'same';
+}
+
+// ═══════════════════════════════════════════════════
+// HINTS
+// ═══════════════════════════════════════════════════
+function updateHintBtn(){
+  const b=document.getElementById('hintBtn');
+  if(!b) return;
+  document.getElementById('hintCnt').textContent=`(${S.hintsLeft} left)`;
+  b.disabled = S.hintsLeft<=0 || S.hintUsed || S.revealed;
+}
+
+function useHint(){
+  if(S.hintsLeft<=0||S.hintUsed||S.revealed) return;
+  S.hintsLeft--; S.hintUsed=true; updateHintBtn();
+  const old=document.getElementById('hintToast'); if(old) old.remove();
+  const t=document.createElement('div'); t.id='hintToast'; t.className='hint-toast';
+  const s=SC[S.sc];
+  const hints={
+    'add-reactant': `Adding a reactant disturbs equilibrium. Which direction does the system shift to use up the extra reactant?`,
+    'rem-reactant': `Removing reactant raises Q above K. The system needs to make more reactant — which direction?`,
+    'add-product':  `Adding product raises Q above K. The system shifts away from the excess.`,
+    'rem-product':  `Removing product drops Q below K. The system shifts to replace what was lost.`,
+    'temp-up':      s.isExo?`For exothermic reactions, heat is a PRODUCT. Adding heat = adding product. Which way?`:`For endothermic, heat is a REACTANT. Adding heat = adding reactant. Which way?`,
+    'temp-down':    s.isExo?`Cooling removes heat (a product). The system shifts to replace the lost product.`:`Cooling removes heat (a reactant). The system shifts to replace the lost reactant.`,
+    'press-up':     s.gasEffect?`High pressure favors FEWER moles of gas. Which side has fewer? Count the coefficients!`:`Both sides have equal moles of gas. Does pressure have a net effect?`,
+    'press-down':   s.gasEffect?`Low pressure favors MORE moles of gas. Which side has more?`:`Equal moles both sides — does pressure cause a shift?`,
+    'catalyst':     `A catalyst lowers Ea equally for both directions. Does it change which side is favored?`,
+    'inert':        `The inert gas doesn't react and doesn't change partial pressures. Does anything that matters change?`
+  };
+  t.innerHTML=`<div class="hint-ttl">💡 Hint (${S.hintsLeft} left)</div>${hints[S.pending]||'Think about what changed and how the system counteracts it.'}`;
+  const rp=document.getElementById('regPanel');
+  rp.parentNode.insertBefore(t, rp.nextSibling);
+}
+
+// ═══════════════════════════════════════════════════
+// CELEBRATIONS
+// ═══════════════════════════════════════════════════
+function showCelebration(msg){
+  const o=document.createElement('div'); o.className='cel-overlay';
+  const b=document.createElement('div'); b.className='cel-burst'; b.textContent=msg;
+  o.appendChild(b); document.body.appendChild(o);
+  setTimeout(()=>o.remove(),2000);
+}
+
+function showWrongFlash(){
+  const f=document.createElement('div'); f.className='wrong-flash';
+  document.body.appendChild(f); setTimeout(()=>f.remove(),700);
+}
+
+// ═══════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════
+function resetSystem(){
+  if(animId) cancelAnimationFrame(animId);
+  if(balAnimId) cancelAnimationFrame(balAnimId);
+  S.catActive=false; S.tempLevel=0; S.pressLevel=0; S.lastStress=null; pSpeed=BSPD;
+  S.hintsLeft=3; S.hintUsed=false; balAngle=0; balTarget=0;
+  rateHist={fwd:[],rev:[]}; S_confidence=null; S_locked=false;
+  loadScenario(S.sc);
+  drawChart(); drawPE(); drawBalance(0); startParticles(); updateUI();
+  setStatus('🔄 System reset! Back to initial equilibrium.','neutral');
+  const et=document.getElementById('balEqTxt');
+  if(et){et.className='bal-eq-txt at-eq';et.textContent='⚖️ Balanced';}
+  document.getElementById('exWhat').textContent     ='System is back at initial equilibrium.';
+  document.getElementById('exResp').textContent     ='No stress applied. Use the controls to disturb equilibrium!';
+  document.getElementById('exShift').textContent    ='No shift. System is balanced.';
+  document.getElementById('exK').textContent        ='K is at its initial value for this scenario.';
+  document.getElementById('exTip').textContent      ='Apply a stress to see a targeted Regents tip!';
+  document.getElementById('exCollision').textContent='At equilibrium, forward and reverse reaction rates are equal because molecular collisions in both directions occur at the same frequency.';
+  document.getElementById('explainToggleBtn').classList.remove('has-content','open');
+  document.getElementById('explainDrawer').classList.remove('open');
+  explainOpen = false;
+}
+
+// ═══════════════════════════════════════════════════
+// SCENARIO SWITCH
+// ═══════════════════════════════════════════════════
+document.getElementById('scenSel').addEventListener('change',function(){
+  if(animId) cancelAnimationFrame(animId);
+  if(balAnimId) cancelAnimationFrame(balAnimId);
+  balAngle=0; balTarget=0;
+  S.pressLevel = 0;
+  loadScenario(this.value);
+  S.markers=[]; S.score={c:0,w:0,streak:0};
+  if(document.getElementById('scoreBar').style.display!=='none'){
+    document.getElementById('scCorrect').textContent=0;
+    document.getElementById('scWrong').textContent=0;
+    document.getElementById('scStreak').textContent=0;
+  }
+  drawChart(); drawPE(); drawBalance(0); startParticles(); updateUI();
+  const et=document.getElementById('balEqTxt');
+  if(et){et.className='bal-eq-txt at-eq';et.textContent='⚖️ Balanced';}
+  setStatus('🔬 Scenario changed! System is at equilibrium.','neutral');
+});
+
+// ═══════════════════════════════════════════════════
+// RESIZE
+// ═══════════════════════════════════════════════════
+let rTimer=null;
+window.addEventListener('resize',()=>{
+  clearTimeout(rTimer);
+  rTimer=setTimeout(()=>{
+    drawChart(); drawPE(); drawBalance(balAngle);
+    if(animId) cancelAnimationFrame(animId); startParticles();
+  },180);
+});
+
+window.addEventListener('resize',()=>{
+  clearTimeout(rTimer);
+  rTimer=setTimeout(()=>{
+    drawChart(); drawPE(); drawBalance(balAngle);
+    if(animId) cancelAnimationFrame(animId); startParticles();
+    // Re-draw expanded modal if open
+    if(document.getElementById('graphModal').classList.contains('open')) {
+      drawModalGraph();
+    }
+  },180);
+});
+
+// ═══════════════════════════════════════════════════
+// GRAPH EXPAND MODAL
+// ═══════════════════════════════════════════════════
+// (modalGraphType and graphLargeMode declared near drawChart)
+
+function openGraphModal(type) {
+  modalGraphType = type;
+  const modal = document.getElementById('graphModal');
+  const title = document.getElementById('graphModalTitle');
+  const ccL   = document.getElementById('cc-large');
+  const peL   = document.getElementById('pe-large');
+
+  title.textContent = type === 'conc'
+    ? '📈 Concentration vs Time'
+    : '⚡ Potential Energy Diagram';
+
+  // Show the right canvas
+  ccL.style.display = type === 'conc' ? 'block' : 'none';
+  peL.style.display = type === 'pe'   ? 'block' : 'none';
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Draw after browser lays out the modal
+  requestAnimationFrame(() => requestAnimationFrame(() => drawModalGraph()));
+}
+
+function closeGraphModal() {
+  const modal = document.getElementById('graphModal');
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+  modalGraphType = null;
+}
+
+function handleModalBackdrop(e) {
+  // Close if clicking the dark backdrop (not the inner box)
+  if (e.target === document.getElementById('graphModal')) closeGraphModal();
+}
+
+function drawModalGraph() {
+  if (!modalGraphType) return;
+  if (modalGraphType === 'conc') drawChartOnCanvas('cc-large');
+  else                           drawPEOnCanvas('pe-large');
+}
+
+// ── Draw concentration graph onto any canvas (reuses drawChart logic) ──
+// (_lgChartCanvas and _lgPECanvas declared near drawChart)
+
+function drawChartOnCanvas(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+
+  // Use getBoundingClientRect for reliable dimensions after layout
+  const rect = wrap.getBoundingClientRect();
+  const W = Math.max(rect.width  || wrap.offsetWidth  || 900, 400);
+  const H = Math.max(rect.height || wrap.offsetHeight || 550, 300);
+  canvas.width  = W;
+  canvas.height = H;
+
+  // Provide the target canvas directly — no ID swap needed
+  _lgChartCanvas = canvas;
+  graphLargeMode = true;
+  drawChart();
+  graphLargeMode = false;
+  _lgChartCanvas = null;
+}
+
+// ── Draw PE diagram onto any canvas ──
+function drawPEOnCanvas(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+
+  const rect = wrap.getBoundingClientRect();
+  const W = Math.max(rect.width  || wrap.offsetWidth  || 900, 400);
+  const H = Math.max(rect.height || wrap.offsetHeight || 550, 300);
+  canvas.width  = W;
+  canvas.height = H;
+
+  _lgPECanvas = canvas;
+  graphLargeMode = true;
+  drawPE();
+  graphLargeMode = false;
+  _lgPECanvas = null;
+}
+
+// Escape key closes modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('graphModal').classList.contains('open')) {
+    closeGraphModal();
+  }
+});
+
+// ═══════════════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════════════
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+else init();
+</script>
+</body>
+</html>
